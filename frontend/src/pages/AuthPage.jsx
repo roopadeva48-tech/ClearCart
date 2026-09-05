@@ -59,26 +59,54 @@ export default function AuthPage({ onLoginSuccess }) {
     localStorage.setItem("clearcart_registered_users", JSON.stringify(users));
   }
 
+  // Validation helper: ensure string contains alphabetic letters (not only numbers)
+  function containsLetters(val) {
+    return /[a-zA-Z]/.test(val.trim());
+  }
+
+  // Email format validator
+  function isValidEmail(email) {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  }
+
+  // Password complexity validator: 1 uppercase, 1 number, 1 special char, min 6 chars
+  function validatePassword(pwd) {
+    if (!pwd || pwd.length < 6) {
+      return "Password must be at least 6 characters long.";
+    }
+    if (!/[A-Z]/.test(pwd)) {
+      return "Password must contain at least one capital letter (A-Z).";
+    }
+    if (!/[0-9]/.test(pwd)) {
+      return "Password must contain at least one number (0-9).";
+    }
+    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]/.test(pwd)) {
+      return "Password must contain at least one special character (e.g. !@#$%^&*).";
+    }
+    return null;
+  }
+
   // Handle Sign In
   function handleSignIn(e) {
     e.preventDefault();
     setErrorMsg("");
     setSuccessMsg("");
 
-    const uid = signInUserId.trim().toLowerCase();
+    const uid = signInUserId.trim();
     const pwd = signInPassword.trim();
 
     if (!uid || !pwd) {
-      setErrorMsg("Please enter both User ID and Password.");
+      setErrorMsg("All fields are mandatory. Please enter both User ID/Email and Password.");
       return;
     }
 
     const users = getRegisteredUsers();
     const matched = users.find(
       (u) =>
-        (u.userId?.toLowerCase() === uid ||
-          u.username?.toLowerCase() === uid ||
-          u.mailId?.toLowerCase() === uid) &&
+        (u.userId?.toLowerCase() === uid.toLowerCase() ||
+          u.username?.toLowerCase() === uid.toLowerCase() ||
+          u.mailId?.toLowerCase() === uid.toLowerCase()) &&
         u.password === pwd
     );
 
@@ -91,10 +119,13 @@ export default function AuthPage({ onLoginSuccess }) {
         mailId: matched.mailId || uid,
       };
       localStorage.setItem("clearcart_auth_user", JSON.stringify(sessionUser));
-      onLoginSuccess(sessionUser);
+      setSuccessMsg("Sign in successful! Launching Copilot…");
+      setTimeout(() => {
+        onLoginSuccess(sessionUser);
+      }, 300);
     } else {
       setErrorMsg(
-        "Invalid User ID or Password. If you haven't created an account yet, please switch to the 'Create Shop Account' tab."
+        "Invalid credentials. Please check your User ID / Password, or create a new account in 'Create Shop Account'."
       );
     }
   }
@@ -109,20 +140,42 @@ export default function AuthPage({ onLoginSuccess }) {
     const shopName = signUpShopName.trim();
     const description = signUpDescription.trim();
     const mailId = signUpMailId.trim().toLowerCase();
-    const password = signUpPassword.trim();
+    const password = signUpPassword;
 
+    // 1. Mandatory check for all fields
     if (!name || !shopName || !description || !mailId || !password) {
-      setErrorMsg("Please fill in all details: Name, Shop Name, Description, Mail ID, and Password.");
+      setErrorMsg("All fields are mandatory. Please fill out all details on this page.");
       return;
     }
 
-    if (!mailId.includes("@") || !mailId.includes(".")) {
-      setErrorMsg("Please enter a valid Mail ID (Email).");
+    // 2. Disallow only numbers for Full Name (must contain letters, can contain numbers)
+    if (!containsLetters(name)) {
+      setErrorMsg("Full Name cannot be numbers only. Please enter a valid name with letters.");
       return;
     }
 
-    if (password.length < 4) {
-      setErrorMsg("Password must be at least 4 characters long.");
+    // 3. Disallow only numbers for Shop Name (must contain letters, can contain numbers)
+    if (!containsLetters(shopName)) {
+      setErrorMsg("Shop Name cannot be numbers only. Please enter a shop name with letters (e.g., Apex Store #102).");
+      return;
+    }
+
+    // 4. Disallow only numbers for Shop Description
+    if (!containsLetters(description)) {
+      setErrorMsg("Shop Description cannot be numbers only. Please provide a description with words.");
+      return;
+    }
+
+    // 5. Validate Email format
+    if (!isValidEmail(mailId)) {
+      setErrorMsg("Please enter a valid Email address (e.g. manager@store.com).");
+      return;
+    }
+
+    // 6. Password Complexity: One capital letter, numbers, and one special character
+    const passwordError = validatePassword(password);
+    if (passwordError) {
+      setErrorMsg(passwordError);
       return;
     }
 
@@ -132,7 +185,7 @@ export default function AuthPage({ onLoginSuccess }) {
     );
 
     if (alreadyExists) {
-      setErrorMsg("An account with this Mail ID already exists. Please Sign In.");
+      setErrorMsg("An account with this Email already exists. Please Sign In.");
       return;
     }
 
@@ -381,22 +434,41 @@ export default function AuthPage({ onLoginSuccess }) {
                     required
                     value={signUpPassword}
                     onChange={(e) => setSignUpPassword(e.target.value)}
-                    placeholder="Create a password"
+                    placeholder="Create a password (e.g. Retail@2026)"
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-10 py-2 text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
                   />
                   <button
                     type="button"
                     onClick={() => setShowSignUpPassword(!showSignUpPassword)}
-                    className="absolute right-3 text-slate-400 hover:text-slate-600"
+                    className="absolute right-3 text-slate-400 hover:text-slate-600 cursor-pointer"
                   >
                     {showSignUpPassword ? <IconEyeOff className="w-4 h-4" /> : <IconEye className="w-4 h-4" />}
                   </button>
+                </div>
+
+                {/* Password Criteria Checklist */}
+                <div className="mt-2 p-2.5 bg-slate-50 rounded-xl border border-slate-200/80 text-[11px] space-y-1">
+                  <p className="font-semibold text-slate-600 mb-1">Password Requirements:</p>
+                  <div className="grid grid-cols-2 gap-1 font-mono text-[10px]">
+                    <span className={`flex items-center gap-1 ${/[A-Z]/.test(signUpPassword) ? "text-emerald-600 font-bold" : "text-slate-400"}`}>
+                      {/[A-Z]/.test(signUpPassword) ? "✓" : "○"} 1 Capital Letter (A-Z)
+                    </span>
+                    <span className={`flex items-center gap-1 ${/[0-9]/.test(signUpPassword) ? "text-emerald-600 font-bold" : "text-slate-400"}`}>
+                      {/[0-9]/.test(signUpPassword) ? "✓" : "○"} Numbers (0-9)
+                    </span>
+                    <span className={`flex items-center gap-1 ${/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]/.test(signUpPassword) ? "text-emerald-600 font-bold" : "text-slate-400"}`}>
+                      {/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]/.test(signUpPassword) ? "✓" : "○"} 1 Special Char (!@#$)
+                    </span>
+                    <span className={`flex items-center gap-1 ${signUpPassword.length >= 6 ? "text-emerald-600 font-bold" : "text-slate-400"}`}>
+                      {signUpPassword.length >= 6 ? "✓" : "○"} Min 6 Characters
+                    </span>
+                  </div>
                 </div>
               </div>
 
               <button
                 type="submit"
-                className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold shadow-xs hover:shadow transition flex items-center justify-center gap-2 cursor-pointer mt-2"
+                className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold shadow-xs hover:shadow transition flex items-center justify-center gap-2 cursor-pointer mt-3"
               >
                 Register Shop &amp; Launch Copilot
               </button>
