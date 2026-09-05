@@ -1,0 +1,19 @@
+flowchart LR
+    U[Store Manager\nNatural-language question] --> F[React + Vite\nManager Dashboard]
+    F -->|POST /api/chat| A[FastAPI\nApplication API]
+    A --> I[Gemini 1.5\nIntent + query planning]
+    I --> Q[Validated SQL/Pandas\nExecution plan]
+    Q --> D[(Local SQLite / Pandas\nGrounding data)]
+    D --> R[Exact result rows\nand computed metrics]
+    R --> G[Gemini 1.5\nGrounded response formatting]
+    G --> V[Response with\nfigures + explanation]
+    V --> F
+
+    A --> AL[Alert engine\nstock-outs · dead stock · spikes]
+    AL --> D
+    AL -->|GET /api/alerts| F
+    D -->|GET /api/data| F
+
+    X[Unsupported or ambiguous request] -.-> S[Refusal / clarification\nNo guessing]
+    A -.-> X
+    S -.-> F

@@ -1,0 +1,102 @@
+[
+  {
+    "product_id": "P001",
+    "name": "Basmati Rice 5kg",
+    "category": "Grains"
+  },
+  {
+    "product_id": "P002",
+    "name": "Sunflower Oil 1L",
+    "category": "Oils"
+  },
+  {
+    "product_id": "P003",
+    "name": "Whole Wheat Flour 2kg",
+    "category": "Grains"
+  },
+  {
+    "product_id": "P004",
+    "name": "Brown Sugar 1kg",
+    "category": "Sweeteners"
+  },
+  {
+    "product_id": "P005",
+    "name": "Sea Salt 500g",
+    "category": "Condiments"
+  },
+  {
+    "product_id": "P006",
+    "name": "Tomato Sauce 400g",
+    "category": "Canned Goods"
+  },
+  {
+    "product_id": "P007",
+    "name": "Pasta Penne 500g",
+    "category": "Dry Goods"
+  },
+  {
+    "product_id": "P008",
+    "name": "Coffee Arabica 250g",
+    "category": "Beverages"
+  },
+  {
+    "product_id": "P009",
+    "name": "Green Tea 100g",
+    "category": "Beverages"
+  },
+  {
+    "product_id": "P010",
+    "name": "Almonds 500g",
+    "category": "Nuts & Seeds"
+  },
+  {
+    "product_id": "P011",
+    "name": "Dark Chocolate 200g",
+    "category": "Confectionery"
+  },
+  {
+    "product_id": "P012",
+    "name": "Oat Flakes 500g",
+    "category": "Grains"
+  },
+  {
+    "product_id": "P013",
+    "name": "Apple Juice 1L",
+    "category": "Beverages"
+  },
+  {
+    "product_id": "P014",
+    "name": "Sparkling Water 6-pack",
+    "category": "Beverages"
+  },
+  {
+    "product_id": "P015",
+    "name": "Dishwasher Tablets 30ct",
+    "category": "Household"
+  },
+  {
+    "product_id": "P016",
+    "name": "Olive Oil Extra Virgin 750ml",
+    "category": "Oils"
+  },
+  {
+    "product_id": "P017",
+    "name": "Chickpeas 500g",
+    "category": "Legumes"
+  },
+  {
+    "product_id": "P018",
+    "name": "Honey Raw 500g",
+    "category": "Sweeteners"
+  },
+  {
+    "product_id": "P019",
+    "name": "Coconut Milk 400ml",
+    "category": "Canned Goods"
+  },
+  {
+    "product_id": "P020",
+    "name": "Protein Bar Mixed Box",
+    "category": "Snacks"
+  }
+]

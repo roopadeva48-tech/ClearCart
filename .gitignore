@@ -1,0 +1,41 @@
+# Secrets & keys — NEVER commit
+.env
+
+# Python runtime
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Database (rebuilt at startup from CSVs)
+*.db
+*.sqlite
+*.sqlite3
+
+# Node
+frontend/node_modules/
+
+# OS noise
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# ──────────────────────────────────────────────────────
+# Items that MUST stay in git (override patterns above):
+# ──────────────────────────────────────────────────────
+# Pre-built React bundle — judges run python app.py, not npm
+!frontend/dist/
+!frontend/dist/**
+
+# Pre-built FAISS index — must be committed for <90s startup
+!data/faiss.index
+!data/faiss_meta.json

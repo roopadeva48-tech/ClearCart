@@ -1,0 +1,234 @@
+@import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Base Light Theme ──────────────────────────────── */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #f8fafc;
+  color: #1e293b;
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, .font-heading {
+  font-family: 'Hanken Grotesk', sans-serif;
+}
+
+code, .font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ─── Custom Light Scrollbar ────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* ─── Stitch Light Canvas Background ────────────────── */
+.bg-canvas {
+  background:
+    radial-gradient(ellipse 80% 50% at 10% 0%, rgba(99, 102, 241, 0.05) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 90% 100%, rgba(16, 185, 129, 0.04) 0%, transparent 60%),
+    #f8fafc;
+}
+
+/* ─── Stitch Card Surfaces (Minimalist & Glass) ─────── */
+.stitch-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.stitch-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.06), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+}
+
+.stitch-glass {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  border-radius: 1rem;
+  box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.05);
+}
+
+/* ─── KPI Light Gradients ───────────────────────────── */
+.kpi-indigo {
+  background: linear-gradient(145deg, #f5f7ff 0%, #ffffff 100%);
+  border-color: #e0e7ff;
+}
+.kpi-indigo:hover {
+  border-color: #c7d2fe;
+}
+
+.kpi-rose {
+  background: linear-gradient(145deg, #fff5f5 0%, #ffffff 100%);
+  border-color: #fee2e2;
+}
+.kpi-rose:hover {
+  border-color: #fecaca;
+}
+
+.kpi-emerald {
+  background: linear-gradient(145deg, #f0fdf4 0%, #ffffff 100%);
+  border-color: #dcfce7;
+}
+.kpi-emerald:hover {
+  border-color: #bbf7d0;
+}
+
+.kpi-amber {
+  background: linear-gradient(145deg, #fffbeb 0%, #ffffff 100%);
+  border-color: #fef3c7;
+}
+.kpi-amber:hover {
+  border-color: #fde68a;
+}
+
+/* ─── Light Alert Cards ─────────────────────────────── */
+.alert-stockout {
+  background: linear-gradient(135deg, #fff1f2 0%, #ffffff 100%);
+  border: 1px solid #fecdd3;
+}
+.alert-spike {
+  background: linear-gradient(135deg, #fffbeb 0%, #ffffff 100%);
+  border: 1px solid #fef08a;
+}
+.alert-dead {
+  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+  border: 1px solid #e2e8f0;
+}
+
+/* ─── Light Status Badges ───────────────────────────── */
+.badge-critical {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.badge-low {
+  background: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
+.badge-ok {
+  background: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+/* ─── Chat Bubbles ──────────────────────────────────── */
+.bubble-user {
+  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+  color: #ffffff;
+  border-radius: 1.25rem 1.25rem 0.25rem 1.25rem;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.25);
+}
+
+.bubble-bot {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  color: #334155;
+  border-radius: 1.25rem 1.25rem 1.25rem 0.25rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+/* ─── Table Row Hover ───────────────────────────────── */
+.trow {
+  transition: background-color 0.15s ease;
+}
+.trow:hover {
+  background-color: #f8faff;
+}
+
+/* ─── Animations ────────────────────────────────────── */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.fade-up    { animation: fadeUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.fade-up-d1 { animation: fadeUp 0.35s 0.05s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.fade-up-d2 { animation: fadeUp 0.35s 0.10s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.fade-up-d3 { animation: fadeUp 0.35s 0.15s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.fade-up-d4 { animation: fadeUp 0.35s 0.20s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+.float-icon { animation: float 3s ease-in-out infinite; }
+
+.ping-dot {
+  position: relative;
+}
+.ping-dot::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: currentColor;
+  animation: pulse-ring 1.8s ease-out infinite;
+}
+
+.typing-dot {
+  animation: blink 1.2s ease-in-out infinite;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+/* ─── Modal overlay ─────────────────────────────────── */
+.modal-overlay {
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}

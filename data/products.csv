@@ -1,0 +1,21 @@
+product_id,name,category,description,unit,reorder_threshold
+P001,Basmati Rice 5kg,Grains,Long-grain premium basmati rice from Punjab; aged 2 years for extra aroma.,bag,20
+P002,Sunflower Oil 1L,Oils,Cold-pressed refined sunflower cooking oil; high smoke point suitable for frying.,bottle,30
+P003,Whole Wheat Flour 2kg,Grains,Stone-ground whole wheat flour; high fibre suitable for chapati and bread.,pack,25
+P004,Brown Sugar 1kg,Sweeteners,Unrefined cane sugar with molasses; rich caramel flavour.,pack,15
+P005,Sea Salt 500g,Condiments,Coarse Mediterranean sea salt; no additives or anti-caking agents.,pouch,10
+P006,Tomato Sauce 400g,Canned Goods,Italian-style crushed tomato passata with basil; BPA-free can.,can,20
+P007,Pasta Penne 500g,Dry Goods,Durum wheat semolina penne rigate; bronze-die cut for better sauce adhesion.,pack,18
+P008,Coffee Arabica 250g,Beverages,Single-origin medium-roast Arabica ground coffee; 100% Arabica beans.,pouch,12
+P009,Green Tea 100g,Beverages,Japanese sencha loose-leaf green tea; high antioxidant content.,tin,8
+P010,Almonds 500g,Nuts & Seeds,California raw whole almonds; unsalted and unroasted.,bag,5
+P011,Dark Chocolate 200g,Confectionery,72% cacao dark chocolate bar; fair-trade certified cocoa.,bar,10
+P012,Oat Flakes 500g,Grains,Rolled oats; gluten-free certified; suitable for porridge and baking.,pack,15
+P013,Apple Juice 1L,Beverages,Cold-pressed cloudy apple juice; no added sugar or preservatives.,carton,25
+P014,Sparkling Water 6-pack,Beverages,Natural mineral sparkling water from Italian springs; 6×500ml.,pack,40
+P015,Dishwasher Tablets 30ct,Household,All-in-one dishwasher tablets with rinse aid and salt functions.,box,10
+P016,Olive Oil Extra Virgin 750ml,Oils,Cold-pressed extra-virgin olive oil; first press; acidity < 0.3%.,bottle,15
+P017,Chickpeas 500g,Legumes,Dried whole chickpeas; high protein; suitable for hummus and curries.,pack,12
+P018,Honey Raw 500g,Sweeteners,Unfiltered raw wildflower honey; unpasteurised to preserve enzymes.,jar,8
+P019,Coconut Milk 400ml,Canned Goods,Full-fat coconut milk; no stabilisers; suitable for curries and desserts.,can,20
+P020,Protein Bar Mixed Box,Snacks,Variety box of 12 high-protein bars; 20g protein per bar; assorted flavours.,box,6
