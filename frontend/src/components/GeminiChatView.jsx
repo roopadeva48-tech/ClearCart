@@ -13,9 +13,14 @@ export default function GeminiChatView({
 
   const displayName = currentUser?.name || "Abilash";
 
+  const userKey = (currentUser?.userId || currentUser?.mailId || currentUser?.name || "guest")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "_");
+  const lastActiveStorageKey = `clearcart_last_active_time_${userKey}`;
+
   // Check if session started fresh or resumed after 1 hour (3600000 ms) break
   const [isLongBreak, setIsLongBreak] = useState(() => {
-    const lastActive = localStorage.getItem("clearcart_last_active_time");
+    const lastActive = localStorage.getItem(lastActiveStorageKey);
     if (!lastActive) return true;
     const ONE_HOUR_MS = 60 * 60 * 1000;
     const elapsed = Date.now() - parseInt(lastActive, 10);
@@ -26,15 +31,15 @@ export default function GeminiChatView({
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
     // Update last activity timestamp on new interactions
     if (messages.length > 0) {
-      localStorage.setItem("clearcart_last_active_time", Date.now().toString());
+      localStorage.setItem(lastActiveStorageKey, Date.now().toString());
     }
-  }, [messages, loading]);
+  }, [messages, loading, lastActiveStorageKey]);
 
   function handleSubmit(e) {
     e?.preventDefault();
     const text = input.trim();
     if (!text || loading) return;
-    localStorage.setItem("clearcart_last_active_time", Date.now().toString());
+    localStorage.setItem(lastActiveStorageKey, Date.now().toString());
     setIsLongBreak(false);
     onSendMessage(text);
     setInput("");

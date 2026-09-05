@@ -5,22 +5,23 @@ import GeminiChatView from "../components/GeminiChatView";
 import ApiKeyModal from "../components/ApiKeyModal";
 import { postChat } from "../api/client";
 
-const STORAGE_KEY = "clearcart_copilot_threads_v1";
-
 export default function CopilotApp({
   onReplaySplash = () => {},
   currentUser = null,
   onLogout = () => {},
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
-  const [hasApiKey, setHasApiKey] = useState(() => {
-    return Boolean(localStorage.getItem("clearcart_gemini_api_key"));
-  });
 
-  const [threads, setThreads] = useState(() => {
+  // Derive unique per-user storage key
+  const userKey = (currentUser?.userId || currentUser?.mailId || currentUser?.name || "guest")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "_");
+  const storageKey = `clearcart_copilot_threads_${userKey}`;
+
+  // Helper to load user-isolated conversation threads
+  function loadUserThreads(key) {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY);
+      const saved = localStorage.getItem(key);
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
@@ -28,27 +29,33 @@ export default function CopilotApp({
     } catch {}
     return [
       {
-        id: "thread-default",
+        id: `thread-${Date.now()}`,
         title: "Stock & Inventory Analysis",
         messages: [],
         updatedAt: Date.now(),
       },
     ];
-  });
+  }
 
-  const [activeThreadId, setActiveThreadId] = useState(() => {
-    return threads[0]?.id || "thread-default";
-  });
+  const [threads, setThreads] = useState(() => loadUserThreads(storageKey));
+  const [activeThreadId, setActiveThreadId] = useState(() => threads[0]?.id || `thread-${Date.now()}`);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Sync threads to localStorage
+  // Reload user's own isolated threads whenever currentUser switches
+  useEffect(() => {
+    const loaded = loadUserThreads(storageKey);
+    setThreads(loaded);
+    setActiveThreadId(loaded[0]?.id || `thread-${Date.now()}`);
+  }, [storageKey]);
+
+  // Sync threads specifically to this user's storage key
   useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(threads));
+      localStorage.setItem(storageKey, JSON.stringify(threads));
     } catch {}
-  }, [threads]);
+  }, [threads, storageKey]);
 
   const activeThread = threads.find((t) => t.id === activeThreadId) || threads[0] || {
     id: "thread-default",
