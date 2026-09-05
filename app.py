@@ -79,13 +79,9 @@ async def test_key(req: TestKeyRequest):
     if not key:
         return {"ok": False, "error": "API key cannot be empty"}
     try:
-        from google import genai
-        client = genai.Client(api_key=key)
-        res = client.models.generate_content(
-            model="gemini-2.0-flash",
-            contents="Say 'OK'",
-        )
-        return {"ok": True, "model": "gemini-2.0-flash", "response": res.text.strip()}
+        from src.ai_agent import _call_gemini
+        res = _call_gemini("Say 'OK'", api_key=key)
+        return {"ok": True, "model": "gemini-flash", "response": res}
     except Exception as e:
         return {"ok": False, "error": str(e)}
 

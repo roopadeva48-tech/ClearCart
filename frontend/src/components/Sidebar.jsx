@@ -150,16 +150,11 @@ export default function Sidebar({
         </div>
       </div>
 
-      {/* Bottom User & Data Grounding Footer */}
-      <div className="p-3 border-t border-slate-200/80 bg-white/60 space-y-2">
-        <div className="px-2 py-1.5 rounded-xl bg-emerald-50/80 border border-emerald-200/80 flex items-center gap-2 text-[11px] font-semibold text-emerald-800">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse flex-shrink-0" />
-          <span className="truncate">Grounded in Local SQLite</span>
-        </div>
-
-        <div className="flex items-center justify-between px-2 py-1 bg-slate-100/70 rounded-xl">
+      {/* Bottom User Footer */}
+      <div className="p-3 border-t border-slate-200/80 bg-white/60">
+        <div className="flex items-center justify-between px-2.5 py-2 bg-slate-100/80 rounded-xl">
           <div className="flex items-center gap-2.5 overflow-hidden">
-            <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-blue-700 to-indigo-600 flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-700 to-indigo-600 flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
               {initials}
             </div>
             <div className="leading-tight overflow-hidden">
@@ -174,10 +169,10 @@ export default function Sidebar({
 
           <button
             onClick={onLogout}
-            className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
+            className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
             title="Log Out"
           >
-            <IconLogout className="w-3.5 h-3.5" />
+            <IconLogout className="w-4 h-4" />
           </button>
         </div>
       </div>

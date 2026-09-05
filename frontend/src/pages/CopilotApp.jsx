@@ -202,8 +202,6 @@ export default function CopilotApp({
           onSearchChange={setSearchQuery}
           onSearchSubmit={handleSearchSubmit}
           onReplaySplash={onReplaySplash}
-          hasApiKey={hasApiKey}
-          onOpenApiKeyModal={() => setIsApiKeyModalOpen(true)}
           currentUser={currentUser}
           onLogout={onLogout}
         />
@@ -217,13 +215,6 @@ export default function CopilotApp({
           />
         </main>
       </div>
-
-      {/* API Key Modal */}
-      <ApiKeyModal
-        isOpen={isApiKeyModalOpen}
-        onClose={() => setIsApiKeyModalOpen(false)}
-        onKeySaved={(k) => setHasApiKey(Boolean(k))}
-      />
     </div>
   );
 }

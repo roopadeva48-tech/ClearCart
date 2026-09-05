@@ -21,13 +21,22 @@ from dataclasses import dataclass, asdict
 from typing import Any, Literal
 
 import pandas as pd
+from dotenv import load_dotenv
+
+load_dotenv()
 
 from src import database as db
 from src import embeddings as emb
 
 # ─── Gemini client ────────────────────────────────────────────────────────────
 
-_GEMINI_MODEL = "gemini-2.0-flash"
+_GEMINI_CANDIDATE_MODELS = [
+    "gemini-flash-latest",
+    "gemini-3.5-flash",
+    "gemini-3.7-flash",
+    "gemini-flash-lite-latest",
+    "gemini-2.5-flash-lite",
+]
 
 
 def _get_client(api_key: str | None = None):
@@ -41,18 +50,30 @@ def _get_client(api_key: str | None = None):
 
 
 def _call_gemini(prompt: str, *, api_key: str | None = None, temperature: float = 0.2) -> str:
-    """Call Gemini and return the text. Raises on API errors."""
+    """Call Gemini and return the text with automatic model resolution. Raises on API errors."""
     from google.genai import types
     client = _get_client(api_key)
-    response = client.models.generate_content(
-        model=_GEMINI_MODEL,
-        contents=prompt,
-        config=types.GenerateContentConfig(
-            temperature=temperature,
-            max_output_tokens=1024,
-        ),
-    )
-    return response.text.strip()
+
+    last_err = None
+    for model_name in _GEMINI_CANDIDATE_MODELS:
+        try:
+            response = client.models.generate_content(
+                model=model_name,
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    temperature=temperature,
+                    max_output_tokens=1024,
+                ),
+            )
+            if response and response.text:
+                return response.text.strip()
+        except Exception as e:
+            last_err = e
+            continue
+
+    if last_err:
+        raise last_err
+    raise RuntimeError("Failed to generate content from available Gemini models.")
 
 
 # ─── Response schema ─────────────────────────────────────────────────────────
@@ -479,7 +500,7 @@ def _build_full_store_context(user_context: dict | None = None) -> str:
         inv = db.get_inventory_snapshot()
         crit = db.get_critical_stock()
         over = db.get_overstocked(multiplier=2.0)
-        top = db.get_top_selling_products(days=30, limit=8)
+        top = db.get_top_sellers(days=30, limit=8)
         spikes = db.get_sales_spikes(days=30)
         dead = db.get_dead_stock(days=30)
 
@@ -573,7 +594,7 @@ def process_question(
             if answer and len(answer.strip()) > 10:
                 # Extract quick figures for metric breakdown card
                 crit = db.get_critical_stock()
-                top = db.get_top_selling_products(days=30, limit=5)
+                top = db.get_top_sellers(days=30, limit=5)
                 figures = {
                     "Critical Items": len(crit),
                     "Top Sellers Tracked": len(top),
