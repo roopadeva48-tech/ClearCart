@@ -92,6 +92,26 @@ def get_critical_stock() -> pd.DataFrame:
     )
 
 
+def get_overstocked(multiplier: float = 2.0) -> pd.DataFrame:
+    """Products where stock is significantly higher than reorder safety threshold."""
+    return _read(
+        """
+        SELECT
+            p.product_id,
+            p.name,
+            p.category,
+            p.reorder_threshold,
+            i.quantity_on_hand,
+            ROUND(CAST(i.quantity_on_hand AS REAL) / p.reorder_threshold, 1) AS ratio_to_threshold
+        FROM products p
+        JOIN inventory i ON p.product_id = i.product_id
+        WHERE i.quantity_on_hand >= p.reorder_threshold * ?
+        ORDER BY i.quantity_on_hand DESC
+        """,
+        (multiplier,),
+    )
+
+
 def get_product_sales(product_id: str, days: int = 30) -> pd.DataFrame:
     """Daily sales for a specific product over the last N days."""
     cutoff = (date.today() - timedelta(days=days)).isoformat()

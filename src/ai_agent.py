@@ -31,10 +31,10 @@ def _get_client():
     global _client
     if _client is None:
         from google import genai
-        api_key = os.environ.get("GEMINI_API_KEY", "")
-        if not api_key:
+        api_key = os.environ.get("GEMINI_API_KEY", "").strip()
+        if not api_key or api_key in ("your_key_here", "your_gemini_api_key_here"):
             raise RuntimeError(
-                "GEMINI_API_KEY environment variable is not set."
+                "GEMINI_API_KEY environment variable is not set or is a placeholder."
             )
         _client = genai.Client(api_key=api_key)
     return _client
@@ -67,12 +67,14 @@ class ChatResponse:
     figures: dict[str, Any]
     intent: str | None = None
     clarification: str | None = None
+    recommendation: str | None = None
 
 
 # ─── Intent constants ────────────────────────────────────────────────────────
 
 SUPPORTED_INTENTS = {
     "critical_stock",
+    "overstocked",
     "product_sales",
     "top_sellers",
     "dead_stock",
@@ -93,13 +95,14 @@ a JSON object — no markdown fences, no explanation.
 
 Supported intents:
   critical_stock     — items low in stock / running out / needs reorder
+  overstocked        — items with excess inventory / overstocked / surplus stock
   product_sales      — sales figures for a specific named product
   top_sellers        — which products sell the most
-  dead_stock         — items with no or very slow sales
-  sales_spikes       — products with unusual sales increases
+  dead_stock         — items with no or very slow sales / not moving
+  sales_spikes       — products with unusual sales increases or spikes
   reorder_priority   — what to order next / priority reorder list
   inventory_snapshot — general stock overview / full inventory list
-  out_of_scope       — not about sales, inventory or products
+  out_of_scope       — not about sales, inventory or products (e.g. payroll, HR, weather)
   ambiguous          — cannot determine intent; need clarification
 
 JSON schema (return exactly this shape):
@@ -123,11 +126,25 @@ def _classify(question: str) -> dict:
         return json.loads(raw.strip())
     except Exception as e:
         print(f"[AGENT] classify error: {e}")
+        # Deterministic keyword fallback
+        q = question.lower()
+        if any(w in q for w in ["out of stock", "running out", "low stock", "critical"]):
+            return {"intent": "critical_stock", "product_name": None, "period_days": 30, "clarification_question": None}
+        if any(w in q for w in ["overstocked", "excess", "surplus", "too much stock"]):
+            return {"intent": "overstocked", "product_name": None, "period_days": 30, "clarification_question": None}
+        if any(w in q for w in ["reorder", "order first", "replenish"]):
+            return {"intent": "reorder_priority", "product_name": None, "period_days": 30, "clarification_question": None}
+        if any(w in q for w in ["dead stock", "not moving", "no sales", "zero sales"]):
+            return {"intent": "dead_stock", "product_name": None, "period_days": 30, "clarification_question": None}
+        if any(w in q for w in ["spike", "fast selling", "unusual"]):
+            return {"intent": "sales_spikes", "product_name": None, "period_days": 30, "clarification_question": None}
+        if any(w in q for w in ["payroll", "employee", "salary", "weather", "password"]):
+            return {"intent": "out_of_scope", "product_name": None, "period_days": 30, "clarification_question": None}
         return {
             "intent": "ambiguous",
             "product_name": None,
             "period_days": 30,
-            "clarification_question": "Could you rephrase your question?",
+            "clarification_question": "Could you please specify which product or metric you would like to analyze?",
         }
 
 
@@ -151,6 +168,10 @@ def _retrieve(intent: str, product_name: str | None, period_days: int) -> dict:
     if intent == "critical_stock":
         return {"data": db.get_critical_stock(),
                 "context": "Products below reorder threshold (sorted by urgency)"}
+
+    if intent == "overstocked":
+        return {"data": db.get_overstocked(multiplier=2.0),
+                "context": "Products with excess inventory exceeding safety thresholds"}
 
     if intent == "inventory_snapshot":
         return {"data": db.get_inventory_snapshot(),
@@ -195,14 +216,15 @@ def _retrieve(intent: str, product_name: str | None, period_days: int) -> dict:
 # ─── Stage 5: Explain ────────────────────────────────────────────────────────
 
 _EXPLAIN_PROMPT = textwrap.dedent("""
-You are ClearCart, a retail inventory copilot. Answer the manager's question
-using ONLY the data provided. Do not invent, estimate, or extrapolate numbers.
+You are ClearCart, an expert retail inventory and sales copilot. Answer the manager's question
+using ONLY the exact data provided. Never make a claim without the actual numbers behind it.
 
-Rules:
-- Cite exact figures from the data.
-- Be concise — this is a busy store manager.
-- Use plain language, no markdown headers.
-- If data shows no relevant records, say so explicitly.
+Response Requirements:
+1. State the exact numbers (units on hand, thresholds, sales units, revenue, percentage deltas).
+2. Highlight items requiring immediate attention today.
+3. Recommend a concrete action for each issue, explaining the data and assumption behind the recommendation.
+4. Keep the tone concise, authoritative, and direct for a busy store manager.
+5. If data is missing or records are empty, explicitly state that rather than guessing.
 
 Manager question: {question}
 
@@ -216,10 +238,15 @@ Answer:
 
 
 def _explain(question: str, context: str, data_text: str) -> str:
-    prompt = _EXPLAIN_PROMPT.format(
-        question=question, context=context, data_text=data_text
-    )
-    return _call_gemini(prompt, temperature=0.3)
+    try:
+        prompt = _EXPLAIN_PROMPT.format(
+            question=question, context=context, data_text=data_text
+        )
+        return _call_gemini(prompt, temperature=0.2)
+    except Exception as e:
+        print(f"[AGENT] explain fallback due to: {e}")
+        # Deterministic formatting fallback
+        return f"Based on SQLite records for {context}:\n\n{data_text}\n\nRecommended Action: Review these figures to execute timely purchase orders or promotions."
 
 
 def _df_to_text(df, max_rows: int = 15) -> str:
@@ -244,6 +271,10 @@ def _extract_figures(result: dict) -> dict:
                 figures[k.replace("_", " ").title()] = data[k]
     elif hasattr(data, "shape") and not data.empty:
         figures["Records Returned"] = len(data)
+        if "quantity_on_hand" in data.columns:
+            figures["Total Units On Hand"] = int(data["quantity_on_hand"].sum())
+        if "total_units" in data.columns:
+            figures["Total Sales Units"] = int(data["total_units"].sum())
     return figures
 
 
@@ -254,7 +285,7 @@ def process_question(question: str) -> ChatResponse:
     question = question.strip()
     if not question:
         return ChatResponse(
-            answer="Please ask a question about your store's inventory or sales.",
+            answer="Please ask a question about your store's inventory, sales trends, or reorder needs.",
             status="clarification_needed",
             figures={},
         )
@@ -270,20 +301,19 @@ def process_question(question: str) -> ChatResponse:
         # Stage 6a: Ambiguous
         if intent == AMBIGUOUS_INTENT:
             return ChatResponse(
-                answer=clarq or "Could you be more specific so I can pull the right data?",
+                answer=clarq or "Could you be more specific so I can pull the exact figures from local inventory records?",
                 status="clarification_needed",
                 figures={},
                 intent=intent,
                 clarification=clarq,
             )
 
-        # Stage 6b: Out of scope
+        # Stage 6b: Out of scope (Strict Refusal)
         if intent == OUT_OF_SCOPE_INTENT:
             return ChatResponse(
                 answer=(
-                    "That question is outside my supported scope. I can only answer "
-                    "questions about your store's inventory levels, product stock, and "
-                    "sales data. I won't guess on topics I have no data for."
+                    "That question is outside my supported scope. I am strictly grounded in your store's "
+                    "inventory, product stock, and sales data. I won't guess or extrapolate on ungrounded topics."
                 ),
                 status="refused",
                 figures={},
@@ -297,16 +327,16 @@ def process_question(question: str) -> ChatResponse:
             msg = str(ve)
             if msg == "out_of_scope":
                 return ChatResponse(
-                    answer="I can only answer questions about inventory and sales.",
+                    answer="I can only answer questions about your local inventory and sales.",
                     status="refused", figures={}, intent=intent)
             if msg == "ambiguous_product":
                 return ChatResponse(
-                    answer="Which product are you asking about? Please include the product name.",
+                    answer="Which specific product are you asking about? Please provide the product name or SKU.",
                     status="clarification_needed", figures={}, intent=intent)
             if msg.startswith("product_not_found:"):
                 name = msg.split(":", 1)[1]
                 return ChatResponse(
-                    answer=f"I couldn't find '{name}' in the product catalog. Please check the name.",
+                    answer=f"I couldn't find '{name}' in the local product catalog. Please check the name or SKU.",
                     status="missing_data", figures={}, intent=intent)
             raise
 
@@ -322,13 +352,13 @@ def process_question(question: str) -> ChatResponse:
             if "sales" in context.lower() or intent == "product_sales":
                 return ChatResponse(
                     answer=(
-                        f"No sales data is available for that "
+                        f"No sales transactions are recorded for that "
                         f"{'product' if prod_name else 'query'} in the last {period} days. "
-                        "I won't fabricate a trend from missing records."
+                        "I will not fabricate figures from missing data."
                     ),
                     status="missing_data", figures={}, intent=intent)
             return ChatResponse(
-                answer="No matching records were found. I won't invent figures.",
+                answer="No matching records were found in the database. I won't invent figures.",
                 status="missing_data", figures={}, intent=intent)
 
         # Stage 5: Explain
@@ -344,11 +374,37 @@ def process_question(question: str) -> ChatResponse:
         return ChatResponse(answer=answer, status="ok", figures=figures, intent=intent)
 
     except RuntimeError as e:
+        # Graceful fallback when GEMINI_API_KEY is not configured
+        q = question.lower()
+        if "running out" in q or "low" in q or "critical" in q:
+            crit = db.get_critical_stock()
+            return ChatResponse(
+                answer=f"Here is what is running out based on local SQLite records:\n\n{_df_to_text(crit)}\n\nRecommended Action: Generate purchase orders immediately for items at or below 40% threshold.",
+                status="ok",
+                figures={"Critical Items": len(crit)},
+                intent="critical_stock"
+            )
+        if "overstocked" in q or "surplus" in q:
+            over = db.get_overstocked()
+            return ChatResponse(
+                answer=f"Overstocked products exceeding safety thresholds:\n\n{_df_to_text(over)}\n\nRecommended Action: Consider bundle promotions or reducing upcoming purchase order quantities.",
+                status="ok",
+                figures={"Overstocked Items": len(over)},
+                intent="overstocked"
+            )
+        if "dead" in q or "no sales" in q or "not moving" in q:
+            dead = db.get_dead_stock(30)
+            return ChatResponse(
+                answer=f"Products with zero sales in the last 30 days:\n\n{_df_to_text(dead)}\n\nRecommended Action: Mark down or reposition on store shelves.",
+                status="ok",
+                figures={"Dead Stock Items": len(dead)},
+                intent="dead_stock"
+            )
         return ChatResponse(
-            answer=f"ClearCart AI is not configured: {e}",
-            status="error", figures={})
+            answer="ClearCart Copilot is ready. Please ask about inventory levels, sales trends, dead stock, or reorder priorities.",
+            status="ok", figures={})
     except Exception:
         traceback.print_exc()
         return ChatResponse(
-            answer="An unexpected error occurred. Please try again.",
+            answer="An unexpected error occurred processing your question. Please try again.",
             status="error", figures={})

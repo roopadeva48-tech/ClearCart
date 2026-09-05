@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Dashboard from "./pages/Dashboard";
+import CopilotApp from "./pages/CopilotApp";
 import SplashScreen from "./components/SplashScreen";
 
 export default function App() {
@@ -10,7 +10,7 @@ export default function App() {
       {showSplash && (
         <SplashScreen onComplete={() => setShowSplash(false)} />
       )}
-      <Dashboard onReplaySplash={() => setShowSplash(true)} />
+      <CopilotApp onReplaySplash={() => setShowSplash(true)} />
     </>
   );
 }
