@@ -146,10 +146,6 @@ export default function GeminiChatView({
             <IconSend className="w-4 h-4" />
           </button>
         </form>
-
-        <p className="text-[11px] font-medium text-slate-400 text-center mt-2">
-          ClearCart provides verified figures from SQLite data. Code-level refusal prevents hallucinations.
-        </p>
       </div>
     </div>
   );
