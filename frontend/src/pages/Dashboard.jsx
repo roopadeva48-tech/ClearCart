@@ -5,6 +5,7 @@ import AlertCards from "../components/AlertCards";
 import ChatPanel from "../components/ChatPanel";
 import DataTable from "../components/DataTable";
 import ReorderModal from "../components/ReorderModal";
+import LogoPage from "./LogoPage";
 import { IconCheck, IconSpark, IconShield, IconCart } from "../components/Icons";
 import { useData } from "../hooks/useData";
 import { useAlerts } from "../hooks/useAlerts";
@@ -15,7 +16,7 @@ export default function Dashboard() {
 
   // Shared interactive state
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState("dashboard");
+  const [activeTab, setActiveTab] = useState("dashboard"); // "dashboard", "inventory", "copilot", "logo"
   const [statusFilter, setStatusFilter] = useState("all");
   const [triggerPrompt, setTriggerPrompt] = useState("");
   const [reorderProduct, setReorderProduct] = useState(null);
@@ -44,6 +45,15 @@ export default function Dashboard() {
     setTimeout(() => {
       setToastMessage(null);
     }, 6000);
+  }
+
+  // If Logo tab is active, show the Logo showcase page
+  if (activeTab === "logo") {
+    return (
+      <LogoPage
+        onNavigateToDashboard={() => setActiveTab("dashboard")}
+      />
+    );
   }
 
   return (
@@ -82,7 +92,7 @@ export default function Dashboard() {
               <h1 className="text-2xl sm:text-3xl font-heading font-extrabold tracking-tight text-slate-900">
                 Retail Intelligence Dashboard
               </h1>
-              <span className="text-xs font-mono font-bold bg-indigo-50 text-indigo-700 px-2.5 py-0.5 rounded-full border border-indigo-100">
+              <span className="text-xs font-mono font-bold bg-blue-50 text-blue-700 px-2.5 py-0.5 rounded-full border border-blue-200">
                 Light Mode
               </span>
             </div>
@@ -93,11 +103,18 @@ export default function Dashboard() {
 
           <div className="flex items-center gap-2.5">
             <button
+              onClick={() => setActiveTab("logo")}
+              className="px-3.5 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 text-xs font-bold shadow-2xs flex items-center gap-1.5 transition"
+              title="View animated Logo Page"
+            >
+              <IconSpark className="w-4 h-4 text-blue-600" />
+              Animated Logo Page
+            </button>
+            <button
               onClick={() => handleAskCopilot("What should I reorder first today?")}
               className="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-semibold shadow-2xs flex items-center gap-1.5 transition"
             >
-              <IconSpark className="w-4 h-4 text-indigo-600" />
-              Priority Reorder Check
+              Priority Check
             </button>
             <button
               onClick={() => {
@@ -106,7 +123,7 @@ export default function Dashboard() {
                   setReorderProduct(crit);
                 }
               }}
-              className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-sm flex items-center gap-1.5 transition"
+              className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-sm flex items-center gap-1.5 transition"
             >
               <IconCart className="w-4 h-4" />
               Quick PO
