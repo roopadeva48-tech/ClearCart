@@ -5,18 +5,17 @@ import AlertCards from "../components/AlertCards";
 import ChatPanel from "../components/ChatPanel";
 import DataTable from "../components/DataTable";
 import ReorderModal from "../components/ReorderModal";
-import LogoPage from "./LogoPage";
 import { IconCheck, IconSpark, IconShield, IconCart } from "../components/Icons";
 import { useData } from "../hooks/useData";
 import { useAlerts } from "../hooks/useAlerts";
 
-export default function Dashboard() {
+export default function Dashboard({ onReplaySplash = () => {} }) {
   const { rows } = useData();
   const { alerts } = useAlerts();
 
   // Shared interactive state
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState("dashboard"); // "dashboard", "inventory", "copilot", "logo"
+  const [activeTab, setActiveTab] = useState("dashboard"); // "dashboard", "inventory", "copilot"
   const [statusFilter, setStatusFilter] = useState("all");
   const [triggerPrompt, setTriggerPrompt] = useState("");
   const [reorderProduct, setReorderProduct] = useState(null);
@@ -47,15 +46,6 @@ export default function Dashboard() {
     }, 6000);
   }
 
-  // If Logo tab is active, show the Logo showcase page
-  if (activeTab === "logo") {
-    return (
-      <LogoPage
-        onNavigateToDashboard={() => setActiveTab("dashboard")}
-      />
-    );
-  }
-
   return (
     <div className="bg-canvas min-h-screen text-slate-900 pb-12">
       {/* Top Navigation */}
@@ -68,6 +58,7 @@ export default function Dashboard() {
         onOpenAlerts={() => {
           handleAskCopilot("Summarize all active alerts and highlight high-risk items.");
         }}
+        onReplaySplash={onReplaySplash}
       />
 
       {/* Main Container */}
@@ -93,27 +84,20 @@ export default function Dashboard() {
                 Retail Intelligence Dashboard
               </h1>
               <span className="text-xs font-mono font-bold bg-blue-50 text-blue-700 px-2.5 py-0.5 rounded-full border border-blue-200">
-                Light Mode
+                Downtown Store #104
               </span>
             </div>
             <p className="text-xs sm:text-sm text-slate-500 mt-1 font-medium">
-              Downtown Store #104 · Grounded decision copilot for inventory and sales operations
+              Grounded AI decision copilot for inventory and sales operations
             </p>
           </div>
 
           <div className="flex items-center gap-2.5">
             <button
-              onClick={() => setActiveTab("logo")}
-              className="px-3.5 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 text-xs font-bold shadow-2xs flex items-center gap-1.5 transition"
-              title="View animated Logo Page"
-            >
-              <IconSpark className="w-4 h-4 text-blue-600" />
-              Animated Logo Page
-            </button>
-            <button
               onClick={() => handleAskCopilot("What should I reorder first today?")}
               className="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-semibold shadow-2xs flex items-center gap-1.5 transition"
             >
+              <IconSpark className="w-4 h-4 text-blue-600" />
               Priority Check
             </button>
             <button
@@ -149,7 +133,7 @@ export default function Dashboard() {
         {/* Main Work Area: Grounded AI Copilot + Live Inventory Catalog */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* AI Copilot Panel (5 Cols on large screens) */}
-          <div className="lg:col-span-5">
+          <div className={`lg:col-span-5 ${activeTab === "inventory" ? "hidden lg:block" : ""}`}>
             <ChatPanel
               triggerPrompt={triggerPrompt}
               onClearTrigger={() => setTriggerPrompt("")}
@@ -157,7 +141,7 @@ export default function Dashboard() {
           </div>
 
           {/* Live Inventory Catalog Table (7 Cols on large screens) */}
-          <div className="lg:col-span-7">
+          <div className={`lg:col-span-7 ${activeTab === "copilot" ? "hidden lg:block" : ""}`}>
             <DataTable
               externalSearch={searchQuery}
               externalStatus={statusFilter}

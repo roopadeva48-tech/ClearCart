@@ -7,14 +7,15 @@ export default function Navbar({
   activeTab = "dashboard",
   onTabChange = () => {},
   onOpenAlerts = () => {},
+  onReplaySplash = () => {},
 }) {
   return (
     <nav className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-8 py-2.5 flex items-center justify-between gap-4 transition-all">
-      {/* Brand & Logo Trigger */}
+      {/* Brand & Logo */}
       <div
-        onClick={() => onTabChange("logo")}
+        onClick={onReplaySplash}
         className="flex items-center gap-3 cursor-pointer group"
-        title="View ClearCart Brand & Animated Logo Showcase"
+        title="Replay ClearCart Brand Intro Animation"
       >
         {/* Lined Cart Icon Mini */}
         <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200/80 flex items-center justify-center p-1 group-hover:bg-blue-600 transition-colors shadow-2xs">
@@ -96,16 +97,6 @@ export default function Navbar({
           }`}
         >
           AI Copilot
-        </button>
-        <button
-          onClick={() => onTabChange("logo")}
-          className={`px-3.5 py-1.5 rounded-lg transition-all ${
-            activeTab === "logo"
-              ? "bg-white text-blue-700 shadow-xs font-bold border border-blue-200"
-              : "hover:text-blue-700 hover:bg-white/50"
-          }`}
-        >
-          ✨ Logo Showcase
         </button>
       </div>
 
