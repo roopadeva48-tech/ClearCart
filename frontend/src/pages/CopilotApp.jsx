@@ -2,12 +2,22 @@ import { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
 import GeminiChatView from "../components/GeminiChatView";
+import ApiKeyModal from "../components/ApiKeyModal";
 import { postChat } from "../api/client";
 
 const STORAGE_KEY = "clearcart_copilot_threads_v1";
 
-export default function CopilotApp({ onReplaySplash = () => {} }) {
+export default function CopilotApp({
+  onReplaySplash = () => {},
+  currentUser = null,
+  onLogout = () => {},
+}) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
+  const [hasApiKey, setHasApiKey] = useState(() => {
+    return Boolean(localStorage.getItem("clearcart_gemini_api_key"));
+  });
+
   const [threads, setThreads] = useState(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -66,14 +76,14 @@ export default function CopilotApp({ onReplaySplash = () => {} }) {
     setThreads((prev) => {
       const filtered = prev.filter((t) => t.id !== id);
       if (filtered.length === 0) {
-        const fresh = {
+        const fallback = {
           id: `thread-${Date.now()}`,
           title: "New Chat",
           messages: [],
           updatedAt: Date.now(),
         };
-        setActiveThreadId(fresh.id);
-        return [fresh];
+        setActiveThreadId(fallback.id);
+        return [fallback];
       }
       if (activeThreadId === id) {
         setActiveThreadId(filtered[0].id);
@@ -86,21 +96,20 @@ export default function CopilotApp({ onReplaySplash = () => {} }) {
     if (!text.trim() || loading) return;
 
     const userMsg = {
+      id: `msg-${Date.now()}-user`,
       role: "user",
       text,
-      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     };
 
-    // Update thread title if it's the first user message
-    const isFirst = activeThread.messages.length === 0;
-    const newTitle = isFirst ? (text.length > 28 ? `${text.slice(0, 28)}…` : text) : activeThread.title;
-
+    // Append user message immediately
     setThreads((prev) =>
       prev.map((t) => {
         if (t.id === activeThread.id) {
+          const isFirstUserMsg = t.messages.length === 0;
           return {
             ...t,
-            title: newTitle,
+            title: isFirstUserMsg ? (text.length > 30 ? text.slice(0, 30) + "…" : text) : t.title,
             messages: [...t.messages, userMsg],
             updatedAt: Date.now(),
           };
@@ -114,12 +123,13 @@ export default function CopilotApp({ onReplaySplash = () => {} }) {
     try {
       const res = await postChat(text);
       const botMsg = {
-        role: "bot",
+        id: `msg-${Date.now()}-bot`,
+        role: "assistant",
         text: res.answer,
         status: res.status,
-        figures: res.figures,
-        intent: res.intent,
-        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        figures: res.figures || {},
+        recommendation: res.recommendation,
+        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       };
 
       setThreads((prev) =>
@@ -134,13 +144,14 @@ export default function CopilotApp({ onReplaySplash = () => {} }) {
           return t;
         })
       );
-    } catch {
-      const errorMsg = {
-        role: "bot",
-        text: "Could not reach the ClearCart backend. Please ensure `python app.py` is running on port 8000.",
+    } catch (err) {
+      const errMsg = {
+        id: `msg-${Date.now()}-err`,
+        role: "assistant",
+        text: "Could not retrieve real-time retail data. Please ensure the ClearCart server is active and try again.",
         status: "error",
         figures: {},
-        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       };
 
       setThreads((prev) =>
@@ -148,7 +159,7 @@ export default function CopilotApp({ onReplaySplash = () => {} }) {
           if (t.id === activeThread.id) {
             return {
               ...t,
-              messages: [...t.messages, errorMsg],
+              messages: [...t.messages, errMsg],
               updatedAt: Date.now(),
             };
           }
@@ -178,6 +189,8 @@ export default function CopilotApp({ onReplaySplash = () => {} }) {
         onNewChat={handleNewChat}
         onDeleteThread={handleDeleteThread}
         onQuickPrompt={handleSendMessage}
+        currentUser={currentUser}
+        onLogout={onLogout}
       />
 
       {/* Main Chat Workspace */}
@@ -189,6 +202,10 @@ export default function CopilotApp({ onReplaySplash = () => {} }) {
           onSearchChange={setSearchQuery}
           onSearchSubmit={handleSearchSubmit}
           onReplaySplash={onReplaySplash}
+          hasApiKey={hasApiKey}
+          onOpenApiKeyModal={() => setIsApiKeyModalOpen(true)}
+          currentUser={currentUser}
+          onLogout={onLogout}
         />
 
         <main className="flex-1 overflow-hidden flex flex-col">
@@ -196,9 +213,17 @@ export default function CopilotApp({ onReplaySplash = () => {} }) {
             messages={activeThread.messages}
             loading={loading}
             onSendMessage={handleSendMessage}
+            currentUser={currentUser}
           />
         </main>
       </div>
+
+      {/* API Key Modal */}
+      <ApiKeyModal
+        isOpen={isApiKeyModalOpen}
+        onClose={() => setIsApiKeyModalOpen(false)}
+        onKeySaved={(k) => setHasApiKey(Boolean(k))}
+      />
     </div>
   );
 }

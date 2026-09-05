@@ -5,6 +5,7 @@ export default function GeminiChatView({
   messages = [],
   loading = false,
   onSendMessage,
+  currentUser = null,
 }) {
   const [input, setInput] = useState("");
   const bottomRef = useRef(null);
@@ -65,8 +66,13 @@ export default function GeminiChatView({
                 <IconSpark className="w-7 h-7" />
               </div>
               <h2 className="text-3xl sm:text-4xl font-heading font-extrabold text-slate-900 tracking-tight">
-                Hello, <span className="bg-gradient-to-r from-blue-700 to-indigo-600 bg-clip-text text-transparent">Store Manager</span>
+                Hello, <span className="bg-gradient-to-r from-blue-700 to-indigo-600 bg-clip-text text-transparent">{currentUser?.name || "Store Manager"}</span>
               </h2>
+              {currentUser?.shopName && (
+                <p className="text-xs font-semibold text-blue-600 font-mono tracking-wide">
+                  📍 {currentUser.shopName}
+                </p>
+              )}
               <p className="text-sm sm:text-base text-slate-500 max-w-xl mx-auto font-medium leading-relaxed">
                 Ask in plain language. ClearCart answers with actual database numbers behind every claim, flags what needs attention today, and recommends concrete actions.
               </p>
@@ -99,7 +105,7 @@ export default function GeminiChatView({
           /* Active Chat Thread (Extended) */
           <div className="space-y-6 pb-24">
             {messages.map((m, idx) => (
-              <ChatMessage key={idx} message={m} />
+              <ChatMessage key={idx} message={m} currentUser={currentUser} />
             ))}
 
             {loading && (
@@ -140,7 +146,7 @@ export default function GeminiChatView({
             type="submit"
             id="copilot-send-btn"
             disabled={loading || !input.trim()}
-            className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed text-white flex items-center justify-center shadow-xs transition-all flex-shrink-0"
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed text-white flex items-center justify-center shadow-xs transition-all flex-shrink-0 cursor-pointer"
             title="Send prompt"
           >
             <IconSend className="w-4 h-4" />
@@ -151,12 +157,21 @@ export default function GeminiChatView({
   );
 }
 
-function ChatMessage({ message }) {
+function ChatMessage({ message, currentUser = null }) {
   const isUser = message.role === "user";
   const [copied, setCopied] = useState(false);
 
+  const initials = currentUser?.name
+    ? currentUser.name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase()
+    : "SM";
+
   function handleCopy() {
-    navigator.clipboard.writeText(message.text);
+    navigator.clipboard.writeText(message.text || "");
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
@@ -219,7 +234,7 @@ function ChatMessage({ message }) {
         </div>
       ) : (
         <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-700 to-indigo-600 text-white font-bold text-xs flex items-center justify-center flex-shrink-0 mt-1 shadow-2xs">
-          SM
+          {initials}
         </div>
       )}
 

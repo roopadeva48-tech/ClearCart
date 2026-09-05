@@ -1,14 +1,17 @@
-import { IconPlus, IconMessage, IconTrash, IconSpark, IconShield, IconChevronLeft, IconBox, IconTrend, IconAlert, IconCart } from "./Icons";
+import { IconPlus, IconMessage, IconTrash, IconSpark, IconShield, IconChevronLeft, IconBox, IconTrend, IconAlert, IconCart, IconLogout } from "./Icons";
 
 export default function Sidebar({
   isOpen,
-  onToggle,
+  onToggle = () => {},
+  onClose = () => {},
   threads = [],
   activeThreadId,
-  onSelectThread,
-  onNewChat,
-  onDeleteThread,
-  onQuickPrompt,
+  onSelectThread = () => {},
+  onNewChat = () => {},
+  onDeleteThread = () => {},
+  onQuickPrompt = () => {},
+  currentUser = null,
+  onLogout = () => {},
 }) {
   const PINNED_PROMPTS = [
     { label: "What is running out?", icon: <IconAlert className="w-3.5 h-3.5 text-rose-500" />, prompt: "What is running out in inventory right now?" },
@@ -18,9 +21,23 @@ export default function Sidebar({
     { label: "What should I reorder first?", icon: <IconCart className="w-3.5 h-3.5 text-emerald-500" />, prompt: "What should I reorder first? Show the priority list and assumptions." },
   ];
 
+  const initials = currentUser?.name
+    ? currentUser.name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase()
+    : "SM";
+
   if (!isOpen) {
     return null;
   }
+
+  const handleClose = () => {
+    if (typeof onClose === "function") onClose();
+    else if (typeof onToggle === "function") onToggle();
+  };
 
   return (
     <aside className="w-72 bg-slate-50/90 border-r border-slate-200 flex flex-col justify-between h-screen sticky top-0 z-30 select-none transition-all duration-300">
@@ -43,8 +60,8 @@ export default function Sidebar({
           </div>
 
           <button
-            onClick={onToggle}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition"
+            onClick={handleClose}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition cursor-pointer"
             title="Collapse sidebar"
           >
             <IconChevronLeft className="w-4 h-4" />
@@ -140,14 +157,28 @@ export default function Sidebar({
           <span className="truncate">Grounded in Local SQLite</span>
         </div>
 
-        <div className="flex items-center gap-2.5 px-2 py-1">
-          <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-blue-700 to-indigo-600 flex items-center justify-center text-[10px] font-bold text-white">
-            SM
+        <div className="flex items-center justify-between px-2 py-1 bg-slate-100/70 rounded-xl">
+          <div className="flex items-center gap-2.5 overflow-hidden">
+            <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-blue-700 to-indigo-600 flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0">
+              {initials}
+            </div>
+            <div className="leading-tight overflow-hidden">
+              <p className="text-xs font-bold text-slate-800 truncate">
+                {currentUser?.name || "Store Manager"}
+              </p>
+              <p className="text-[10px] text-slate-400 truncate" title={currentUser?.shopName || "Downtown Store #104"}>
+                {currentUser?.shopName || "Downtown Store #104"}
+              </p>
+            </div>
           </div>
-          <div className="leading-tight overflow-hidden">
-            <p className="text-xs font-bold text-slate-800 truncate">Store Manager</p>
-            <p className="text-[10px] text-slate-400">Downtown Store #104</p>
-          </div>
+
+          <button
+            onClick={onLogout}
+            className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
+            title="Log Out"
+          >
+            <IconLogout className="w-3.5 h-3.5" />
+          </button>
         </div>
       </div>
     </aside>

@@ -19,7 +19,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-# Load .env if present (local dev only — judges supply GEMINI_API_KEY via env)
+# Load .env if present (local dev only)
 load_dotenv()
 
 # ─── Startup / shutdown ───────────────────────────────────────────────────────
@@ -33,13 +33,12 @@ async def lifespan(app: FastAPI):
     from src.database import init_db
     init_db()
 
-    # 2. Embeddings: load pre-built FAISS index (fast — just mmap the file)
+    # 2. Embeddings: load pre-built FAISS index
     from src import embeddings as emb
     emb.load_index()
 
     print("[START] ClearCart ready on http://localhost:8000")
     yield
-    # Nothing to clean up
 
 
 # ─── App ─────────────────────────────────────────────────────────────────────
@@ -63,22 +62,49 @@ app.add_middleware(
 
 class ChatRequest(BaseModel):
     message: str
+    api_key: str | None = None
+    user_context: dict | None = None
+
+
+class TestKeyRequest(BaseModel):
+    api_key: str
 
 
 # ─── API Routes ──────────────────────────────────────────────────────────────
 
+@app.post("/api/test_key")
+async def test_key(req: TestKeyRequest):
+    """Test and validate a user-supplied Gemini API Key."""
+    key = req.api_key.strip()
+    if not key:
+        return {"ok": False, "error": "API key cannot be empty"}
+    try:
+        from google import genai
+        client = genai.Client(api_key=key)
+        res = client.models.generate_content(
+            model="gemini-2.0-flash",
+            contents="Say 'OK'",
+        )
+        return {"ok": True, "model": "gemini-2.0-flash", "response": res.text.strip()}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+
 @app.post("/api/chat")
 async def chat(req: ChatRequest):
     """
-    Accept a natural-language question and return a grounded answer.
-    Never returns a 500 — all errors are surfaced in the response body.
+    Accept a natural-language question and return a dynamic grounded answer
+    using Gemini API Key when provided, customized with user & shop context.
     """
     from src.ai_agent import process_question
     try:
-        result = process_question(req.message)
+        result = process_question(
+            req.message,
+            api_key=req.api_key,
+            user_context=req.user_context,
+        )
         return asdict(result)
     except Exception as e:
-        # Safety net — should never reach here given agent's own error handling
         return {
             "answer": "An unexpected server error occurred. Please try again.",
             "status": "error",
@@ -135,15 +161,10 @@ if DIST.is_dir():
             return FileResponse(str(target))
         return FileResponse(str(DIST / "index.html"))
 else:
-    print(
-        "[WARN] frontend/dist/ not found. "
-        "Run: cd frontend && npm run build  then restart app.py."
-    )
-
     @app.get("/")
     async def no_frontend():
         return JSONResponse(
-            {"error": "Frontend not built. See README for build instructions."},
+            {"error": "Frontend not built. Run npm run build in frontend directory."},
             status_code=503,
         )
 

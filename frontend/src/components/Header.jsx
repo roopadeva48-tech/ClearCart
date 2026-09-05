@@ -1,4 +1,4 @@
-import { IconMenu, IconSearch, IconSpark, IconX, IconRefresh } from "./Icons";
+import { IconMenu, IconSearch, IconSpark, IconX, IconRefresh, IconLogout, IconStore } from "./Icons";
 
 export default function Header({
   sidebarOpen,
@@ -7,6 +7,10 @@ export default function Header({
   onSearchChange = () => {},
   onSearchSubmit = () => {},
   onReplaySplash = () => {},
+  hasApiKey = false,
+  onOpenApiKeyModal = () => {},
+  currentUser = null,
+  onLogout = () => {},
 }) {
   function handleKeyDown(e) {
     if (e.key === "Enter" && searchQuery.trim()) {
@@ -22,7 +26,7 @@ export default function Header({
           <button
             onClick={onToggleSidebar}
             id="sidebar-toggle-btn"
-            className="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 hover:text-slate-900 transition shadow-2xs"
+            className="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 hover:text-slate-900 transition shadow-2xs cursor-pointer"
             title="Open history sidebar"
           >
             <IconMenu className="w-4 h-4" />
@@ -68,12 +72,33 @@ export default function Header({
         </div>
       </div>
 
-      {/* Right: Model status pill & replay */}
+      {/* Right: API Key Badge, Shop Profile & Replay */}
       <div className="flex items-center gap-2">
-        <div className="hidden md:flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-800 text-[11px] font-mono font-semibold">
-          <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse" />
-          <span>Gemini 2.0 · Grounded</span>
-        </div>
+        {/* Dynamic API Key Badge / Configuration Button */}
+        <button
+          onClick={onOpenApiKeyModal}
+          id="api-key-config-btn"
+          className={`px-3 py-1.5 rounded-xl border text-[11px] font-semibold flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer ${
+            hasApiKey
+              ? "bg-emerald-50 border-emerald-200 text-emerald-800 hover:bg-emerald-100"
+              : "bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
+          }`}
+          title="Configure Gemini API Key for Dynamic AI Chat"
+        >
+          <span className={`w-2 h-2 rounded-full ${hasApiKey ? "bg-emerald-500 animate-pulse" : "bg-blue-600"}`} />
+          <span className="hidden md:inline">{hasApiKey ? "Gemini 2.0 Dynamic AI Active" : "🔑 Set Gemini API Key"}</span>
+          <span className="md:hidden">{hasApiKey ? "AI Active" : "API Key"}</span>
+        </button>
+
+        {/* Current Shop Pill */}
+        {currentUser && (
+          <div className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-[11px] font-semibold text-slate-700">
+            <IconStore className="w-3.5 h-3.5 text-blue-600" />
+            <span className="max-w-[120px] truncate" title={currentUser.shopName}>
+              {currentUser.shopName}
+            </span>
+          </div>
+        )}
 
         <button
           onClick={onReplaySplash}
@@ -82,6 +107,16 @@ export default function Header({
         >
           <IconRefresh className="w-4 h-4" />
         </button>
+
+        {currentUser && (
+          <button
+            onClick={onLogout}
+            className="p-2 rounded-xl border border-slate-200 bg-white hover:bg-rose-50 text-slate-500 hover:text-rose-600 transition shadow-2xs"
+            title="Sign Out"
+          >
+            <IconLogout className="w-4 h-4" />
+          </button>
+        )}
       </div>
     </header>
   );

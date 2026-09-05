@@ -28,26 +28,22 @@ from src import embeddings as emb
 # ─── Gemini client ────────────────────────────────────────────────────────────
 
 _GEMINI_MODEL = "gemini-2.0-flash"
-_client = None
 
 
-def _get_client():
-    global _client
-    if _client is None:
-        from google import genai
-        api_key = os.environ.get("GEMINI_API_KEY", "").strip()
-        if not api_key or api_key in ("your_key_here", "your_gemini_api_key_here"):
-            raise RuntimeError(
-                "GEMINI_API_KEY environment variable is not set or is a placeholder."
-            )
-        _client = genai.Client(api_key=api_key)
-    return _client
+def _get_client(api_key: str | None = None):
+    key = (api_key or os.environ.get("GEMINI_API_KEY", "")).strip()
+    if not key or key in ("your_key_here", "your_gemini_api_key_here"):
+        raise RuntimeError(
+            "GEMINI_API_KEY is not configured. Provide an API key to enable dynamic AI reasoning."
+        )
+    from google import genai
+    return genai.Client(api_key=key)
 
 
-def _call_gemini(prompt: str, *, temperature: float = 0.2) -> str:
+def _call_gemini(prompt: str, *, api_key: str | None = None, temperature: float = 0.2) -> str:
     """Call Gemini and return the text. Raises on API errors."""
     from google.genai import types
-    client = _get_client()
+    client = _get_client(api_key)
     response = client.models.generate_content(
         model=_GEMINI_MODEL,
         contents=prompt,
@@ -175,10 +171,10 @@ def _deterministic_classify(question: str) -> dict:
     return {"intent": "critical_stock", "product_name": None, "period_days": 30, "clarification_question": None}
 
 
-def _classify(question: str) -> dict:
+def _classify(question: str, api_key: str | None = None) -> dict:
     try:
         prompt = _CLASSIFY_PROMPT.format(question=question)
-        raw = _call_gemini(prompt, temperature=0.0)
+        raw = _call_gemini(prompt, api_key=api_key, temperature=0.0)
         raw = re.sub(r"^```(?:json)?\s*", "", raw, flags=re.MULTILINE)
         raw = re.sub(r"```\s*$", "", raw, flags=re.MULTILINE)
         res = json.loads(raw.strip())
@@ -422,12 +418,12 @@ def _format_deterministic_answer(intent: str, result: dict, question: str) -> st
     return f"**Inventory Snapshot:** {len(data)} catalog items tracked in SQLite database. Total on hand volume: {data['quantity_on_hand'].sum()} units."
 
 
-def _explain(question: str, context: str, data_text: str, intent: str, result: dict) -> str:
+def _explain(question: str, context: str, data_text: str, intent: str, result: dict, api_key: str | None = None) -> str:
     try:
         prompt = _EXPLAIN_PROMPT.format(
             question=question, context=context, data_text=data_text
         )
-        ans = _call_gemini(prompt, temperature=0.2)
+        ans = _call_gemini(prompt, api_key=api_key, temperature=0.2)
         if ans and len(ans.strip()) > 10:
             return ans
     except Exception:
@@ -470,8 +466,74 @@ def _extract_figures(result: dict) -> dict:
 
 # ─── Main entry point ────────────────────────────────────────────────────────
 
-def process_question(question: str) -> ChatResponse:
-    """Full 6-stage pipeline. Always returns ChatResponse — never raises."""
+def _build_full_store_context(user_context: dict | None = None) -> str:
+    """Compile a complete, real-time snapshot of the store's SQLite database for Gemini."""
+    lines = []
+    if user_context:
+        name = user_context.get("name", "Store Manager")
+        shop = user_context.get("shopName", "ClearCart Retail Store")
+        desc = user_context.get("description", "")
+        lines.append(f"### Store Profile\n• Store Manager: {name}\n• Shop Name: {shop}\n• Shop Specialty/Profile: {desc}\n")
+
+    try:
+        inv = db.get_inventory_snapshot()
+        crit = db.get_critical_stock()
+        over = db.get_overstocked(multiplier=2.0)
+        top = db.get_top_selling_products(days=30, limit=8)
+        spikes = db.get_sales_spikes(days=30)
+        dead = db.get_dead_stock(days=30)
+
+        lines.append(f"### Live Inventory Overview ({len(inv)} catalog products total):")
+        for _, r in inv.iterrows():
+            lines.append(f"• {r['name']} (SKU: {r['product_id']}, Cat: {r['category']}): Stock={r['quantity_on_hand']} units, Safety Threshold={r['reorder_threshold']}, Status={r['status']}")
+
+        lines.append("\n### Critical Low Stock (Needs Immediate Reorder):")
+        if not crit.empty:
+            for _, r in crit.iterrows():
+                lines.append(f"• {r['name']} ({r['product_id']}): {r['quantity_on_hand']}/{r['reorder_threshold']} units ({r['pct_of_threshold']}% of target buffer)")
+        else:
+            lines.append("• None — all inventory is above minimum thresholds.")
+
+        lines.append("\n### Overstocked / Surplus Stock:")
+        if not over.empty:
+            for _, r in over.iterrows():
+                lines.append(f"• {r['name']} ({r['product_id']}): {r['quantity_on_hand']} units on hand ({r['reorder_threshold']} safety threshold)")
+        else:
+            lines.append("• None — no excess stock.")
+
+        lines.append("\n### Top Selling Products (Last 30 Days):")
+        if not top.empty:
+            for _, r in top.iterrows():
+                lines.append(f"• {r['name']} ({r['product_id']}): {r['total_units']} units sold (${r['total_revenue']:,.2f} revenue)")
+
+        lines.append("\n### Recent Velocity Spikes (Last 7 Days):")
+        if not spikes.empty:
+            for _, r in spikes.iterrows():
+                lines.append(f"• {r['name']} ({r['product_id']}): {r['recent_avg']} units/day vs {r['baseline_avg']} baseline (+{r['spike_pct']}%)")
+        else:
+            lines.append("• No sudden sales velocity spikes.")
+
+        lines.append("\n### Dead Stock (0 Transactions in 30 Days):")
+        if not dead.empty:
+            for _, r in dead.iterrows():
+                lines.append(f"• {r['name']} ({r['product_id']}): {r['quantity_on_hand']} idle units on shelf")
+        else:
+            lines.append("• No dead stock.")
+
+    except Exception as e:
+        lines.append(f"Error querying live database: {e}")
+
+    return "\n".join(lines)
+
+
+def process_question(
+    question: str,
+    api_key: str | None = None,
+    user_context: dict | None = None,
+) -> ChatResponse:
+    """
+    Full dynamic AI reasoning pipeline with user personalization and strict data grounding.
+    """
     question = question.strip()
     if not question:
         return ChatResponse(
@@ -480,71 +542,76 @@ def process_question(question: str) -> ChatResponse:
             figures={},
         )
 
+    clean_key = (api_key or os.environ.get("GEMINI_API_KEY", "")).strip()
+    has_api_key = bool(clean_key and clean_key not in ("your_key_here", "your_gemini_api_key_here"))
+
+    # When Gemini API Key is provided, perform dynamic intelligent reasoning over live data
+    if has_api_key:
+        try:
+            full_context = _build_full_store_context(user_context)
+            system_prompt = textwrap.dedent(f"""
+            You are ClearCart Copilot, an elite AI retail intelligence assistant for store managers.
+            Answer the store manager's question using the verified store data below.
+
+            STORE DATA CONTEXT:
+            {full_context}
+
+            RULES:
+            1. Address the manager and store context naturally when appropriate.
+            2. Ground all claims in the exact figures provided (units on hand, safety thresholds, revenue, percentages).
+            3. Highlight items needing urgent attention today.
+            4. Provide actionable, practical retail recommendations (e.g. Purchase Order quantities, markdown strategies, inventory re-allocations) and explain assumptions.
+            5. Use clean markdown: bold key metrics, use bullet points, and include a '🎯 Recommended Action:' highlight.
+            6. If the question is outside store operations/inventory, politely refuse and state your supported operational scope.
+            7. Never hallucinate numbers not supported by the database context.
+
+            USER QUESTION:
+            {question}
+            """)
+
+            answer = _call_gemini(system_prompt, api_key=clean_key, temperature=0.25)
+            if answer and len(answer.strip()) > 10:
+                # Extract quick figures for metric breakdown card
+                crit = db.get_critical_stock()
+                top = db.get_top_selling_products(days=30, limit=5)
+                figures = {
+                    "Critical Items": len(crit),
+                    "Top Sellers Tracked": len(top),
+                }
+                if not crit.empty:
+                    figures["Lowest Stock SKU"] = f"{crit.iloc[0]['name']} ({crit.iloc[0]['quantity_on_hand']} left)"
+                if not top.empty:
+                    figures["Top Product"] = f"{top.iloc[0]['name']} ({top.iloc[0]['total_units']} sold)"
+
+                return ChatResponse(
+                    answer=answer,
+                    status="ok",
+                    figures=figures,
+                    intent="dynamic_gemini_reasoning",
+                )
+        except Exception as gemini_err:
+            print(f"[Gemini Error] Fallback to deterministic engine: {gemini_err}")
+
+    # Fallback: Deterministic engine
     try:
-        # Stage 2: Classify
-        clf       = _classify(question)
+        clf       = _deterministic_classify(question)
         intent    = clf.get("intent", "critical_stock")
         prod_name = clf.get("product_name")
         period    = int(clf.get("period_days") or 30)
 
-        # Stage 6b: Out of scope (Strict Refusal)
         if intent == OUT_OF_SCOPE_INTENT:
             return ChatResponse(
                 answer=(
                     "That question is outside my supported operational scope. I am strictly grounded in your store's "
-                    "inventory levels, product catalog, and sales data. I do not extrapolate on ungrounded topics."
+                    "inventory levels, product catalog, and sales data."
                 ),
                 status="refused",
                 figures={},
                 intent=intent,
             )
 
-        # Stage 3: Retrieve
-        try:
-            result = _retrieve(intent, prod_name, period)
-        except ValueError as ve:
-            msg = str(ve)
-            if msg == "out_of_scope":
-                return ChatResponse(
-                    answer="I can only answer questions about your local store inventory and sales records.",
-                    status="refused", figures={}, intent=intent)
-            if msg == "ambiguous_product":
-                return ChatResponse(
-                    answer="Which specific product are you asking about? Please provide the product name or SKU (e.g., Sparkling Water or Organic Milk).",
-                    status="clarification_needed", figures={}, intent=intent)
-            if msg.startswith("product_not_found:"):
-                name = msg.split(":", 1)[1]
-                return ChatResponse(
-                    answer=f"I couldn't find '{name}' in the store product catalog. Please verify the product name or SKU.",
-                    status="missing_data", figures={}, intent=intent)
-            raise
-
-        # Stage 4: Validate
+        result = _retrieve(intent, prod_name, period)
         data = result.get("data")
-        has_compound = ("spikes" in result or "dead" in result)
-        empty = (
-            not has_compound
-            and (
-                data is None
-                or (isinstance(data, dict) and not data)
-                or (hasattr(data, "empty") and data.empty)
-            )
-        )
-        if empty:
-            context = result.get("context", "")
-            if "sales" in context.lower() or intent == "product_sales":
-                return ChatResponse(
-                    answer=(
-                        f"No sales transactions are recorded for that "
-                        f"{'product' if prod_name else 'query'} in the last {period} days. "
-                        "I will not fabricate figures from missing records."
-                    ),
-                    status="missing_data", figures={}, intent=intent)
-            return ChatResponse(
-                answer="No matching records were found in the database. I won't invent figures.",
-                status="missing_data", figures={}, intent=intent)
-
-        # Stage 5: Explain
         parts = []
         if data is not None and not (hasattr(data, "empty") and data.empty):
             parts.append(_df_to_text(data))
@@ -552,11 +619,9 @@ def process_question(question: str) -> ChatResponse:
             parts.append("Velocity spikes:\n" + _df_to_text(result["spikes"]))
         if "dead" in result and not result["dead"].empty:
             parts.append("Dead stock:\n" + _df_to_text(result["dead"]))
-        if "daily" in result and not result["daily"].empty:
-            parts.append("Recent daily sales:\n" + _df_to_text(result["daily"].tail(7)))
 
         data_text = "\n\n".join(parts) if parts else "(no records)"
-        answer = _explain(question, result.get("context", ""), data_text, intent, result)
+        answer = _explain(question, result.get("context", ""), data_text, intent, result, api_key=api_key)
         figures = _extract_figures(result)
 
         return ChatResponse(answer=answer, status="ok", figures=figures, intent=intent)
@@ -565,4 +630,6 @@ def process_question(question: str) -> ChatResponse:
         traceback.print_exc()
         return ChatResponse(
             answer="An unexpected error occurred while processing your query. Please try again.",
-            status="error", figures={})
+            status="error",
+            figures={},
+        )

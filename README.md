@@ -24,7 +24,22 @@ The AI layer (Gemini 1.5 Flash) handles only *intent classification* and *respon
 
 ---
 
-## How to run
+## Authentication & Shop Registration
+
+ClearCart features a built-in authentication page for store managers and shop owners.
+
+### 📝 Shop Account Registration (Sign Up)
+To register your store, switch to the **"Create Shop Account"** tab and provide:
+1. **Name** — Store Manager / Owner Name
+2. **Shop Name** — Retail store branch / store name
+3. **Shop Description** — Retail specialty / inventory scope
+4. **Mail ID** — Contact email address
+5. **Password** — Account security password
+
+### 🔑 Sign In
+Once registered, store managers can sign in using their **User ID / Email** and **Password**.
+
+---
 
 ### 1. Set your Gemini API key
 
