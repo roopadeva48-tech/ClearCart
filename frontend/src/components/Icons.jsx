@@ -48,12 +48,45 @@ export function IconSend({ className = "w-5 h-5" }) {
   );
 }
 
-export function IconSpark({ className = "w-5 h-5" }) {
+export function IconClearCart({ className = "w-5 h-5", strokeWidth = 11 }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12 1.5a.75.75 0 0 1 .75.75V7.5h-1.5V2.25A.75.75 0 0 1 12 1.5ZM5.636 4.136a.75.75 0 0 1 1.06 0l4.243 4.243-1.06 1.06L5.636 5.196a.75.75 0 0 1 0-1.06ZM18.364 4.136a.75.75 0 0 1 0 1.06l-4.243 4.243-1.06-1.06 4.243-4.243a.75.75 0 0 1 1.06 0ZM1.5 12a.75.75 0 0 1 .75-.75H7.5v1.5H2.25A.75.75 0 0 1 1.5 12ZM16.5 12a.75.75 0 0 1 .75-.75h5.25a.75.75 0 0 1 0 1.5H17.25A.75.75 0 0 1 16.5 12ZM5.636 19.864a.75.75 0 0 1 0-1.06l4.243-4.243 1.06 1.06-4.243 4.243a.75.75 0 0 1-1.06 0ZM18.364 19.864a.75.75 0 0 1-1.06 0l-4.243-4.243 1.06-1.06 4.243 4.243a.75.75 0 0 1 0 1.06ZM12 16.5a.75.75 0 0 1 .75.75v5.25a.75.75 0 0 1-1.5 0V17.25a.75.75 0 0 1 .75-.75Z" />
+    <svg
+      viewBox="58 36 166 150"
+      className={className}
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="
+          M 72 62
+          C 84 62, 102 44, 116 44
+          C 128 44, 134 54, 126 66
+          C 118 78, 100 70, 94 62
+          C 88 56, 114 135, 122 148
+          C 122 165, 102 180, 92 166
+          C 82 152, 102 136, 122 148
+          L 182 148
+          C 182 165, 162 180, 152 166
+          C 142 152, 162 136, 182 148
+          C 188 142, 206 102, 214 88
+          C 218 80, 208 78, 192 78
+          L 155 78
+          C 138 78, 138 104, 155 104
+          L 190 104
+          C 204 104, 204 126, 190 126
+          L 146 126
+        "
+        stroke="currentColor"
+        strokeWidth={strokeWidth}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
+}
+
+export function IconSpark({ className = "w-5 h-5" }) {
+  return <IconClearCart className={className} strokeWidth={11} />;
 }
 
 export function IconSearch({ className = "w-5 h-5" }) {

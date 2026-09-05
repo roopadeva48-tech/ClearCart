@@ -227,8 +227,8 @@ export default function AuthPage({ onLoginSuccess }) {
         {/* Top Header Banner */}
         <div className="bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-700 text-white p-6 sm:p-8 text-center relative overflow-hidden">
           <div className="relative z-10 flex flex-col items-center">
-            <div className="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 text-white flex items-center justify-center mb-3 shadow-inner">
-              <IconSpark className="w-8 h-8" />
+            <div className="w-16 h-16 rounded-2xl bg-white/15 backdrop-blur-md border border-white/25 text-white flex items-center justify-center mb-3 shadow-md">
+              <IconSpark className="w-10 h-10" />
             </div>
             <h1 className="font-heading font-extrabold text-2xl tracking-tight">
               ClearCart <span className="text-blue-200">Intelligence</span>

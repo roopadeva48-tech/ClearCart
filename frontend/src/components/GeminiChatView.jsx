@@ -85,8 +85,8 @@ export default function GeminiChatView({
             /* Empty / Long Break Welcome State (Hi Abilash) */
             <div className="flex flex-col items-start justify-center min-h-[55vh] text-left space-y-6 fade-up py-6">
               <div className="space-y-2.5 max-w-2xl">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-700 to-indigo-600 text-white flex items-center justify-center shadow-md shadow-blue-200">
-                  <IconSpark className="w-6 h-6" />
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-700 to-indigo-600 text-white flex items-center justify-center shadow-lg shadow-blue-200">
+                  <IconSpark className="w-9 h-9" />
                 </div>
                 <h2 className="text-3xl sm:text-4xl font-heading font-extrabold text-slate-900 tracking-tight">
                   Hi <span className="bg-gradient-to-r from-blue-700 to-indigo-600 bg-clip-text text-transparent">{displayName}</span>

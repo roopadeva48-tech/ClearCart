@@ -46,8 +46,8 @@ export default function Sidebar({
         {/* Brand & Collapse */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-xs">
-              <IconSpark className="w-4 h-4" />
+            <div className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-xs">
+              <IconSpark className="w-6 h-6" />
             </div>
             <div>
               <span className="font-heading font-extrabold text-base tracking-tight text-slate-900">
