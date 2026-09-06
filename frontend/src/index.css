@@ -279,9 +279,65 @@ code, .font-mono {
 .typing-dot:nth-child(2) { animation-delay: 0.2s; }
 .typing-dot:nth-child(3) { animation-delay: 0.4s; }
 
+/* ─── Form & Tab Sliding Keyframes ──────────────────── */
+@keyframes slideInRight {
+  0% {
+    opacity: 0;
+    transform: translateX(36px) scale(0.98);
+    filter: blur(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes slideInLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(-36px) scale(0.98);
+    filter: blur(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes tabGlow {
+  0%, 100% {
+    box-shadow: 0 4px 14px -2px rgba(37, 99, 235, 0.18);
+  }
+  50% {
+    box-shadow: 0 6px 20px -2px rgba(37, 99, 235, 0.32);
+  }
+}
+
+.animate-slide-right {
+  animation: slideInRight 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-slide-left {
+  animation: slideInLeft 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-tab-active {
+  animation: tabGlow 3s ease-in-out infinite;
+}
+
+.stagger-1 { animation-delay: 0.03s; }
+.stagger-2 { animation-delay: 0.07s; }
+.stagger-3 { animation-delay: 0.11s; }
+.stagger-4 { animation-delay: 0.15s; }
+.stagger-5 { animation-delay: 0.19s; }
+.stagger-6 { animation-delay: 0.23s; }
+
 /* ─── Modal overlay ─────────────────────────────────── */
 .modal-overlay {
   background: rgba(15, 23, 42, 0.4);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
+
