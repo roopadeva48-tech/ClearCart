@@ -3,7 +3,7 @@ import ClearCartAnimatedLogo from "../components/ClearCartAnimatedLogo";
 import { IconSpark, IconRefresh, IconCheck, IconShield, IconCart, IconChevron } from "../components/Icons";
 
 export default function LogoPage({ onNavigateToDashboard }) {
-  const [speed, setSpeed] = useState(2.4);
+  const [speed, setSpeed] = useState(1.0);
   const [size, setSize] = useState("hero");
   const [bgStyle, setBgStyle] = useState("canvas"); // "canvas", "studio", "dark"
   const [logoKey, setLogoKey] = useState(0);

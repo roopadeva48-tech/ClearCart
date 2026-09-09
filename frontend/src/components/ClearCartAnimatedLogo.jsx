@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 
 export default function ClearCartAnimatedLogo({
   size = "lg", // "sm", "md", "lg", "xl", "hero"
-  duration = 2.4, // seconds
+  duration = 1.0, // seconds
   autoReplay = false,
   showText = true,
   interactive = true,

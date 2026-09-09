@@ -7,24 +7,24 @@ export default function SplashScreen({ onComplete }) {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    // Progress bar animation
+    // Fast progress bar animation
     const progressInterval = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
           clearInterval(progressInterval);
           return 100;
         }
-        return prev + 4;
+        return prev + 10;
       });
-    }, 100);
+    }, 40);
 
-    // Auto-transition to dashboard after animation completes
+    // Fast auto-transition to app
     const timer = setTimeout(() => {
       setFading(true);
       setTimeout(() => {
         onComplete();
-      }, 600); // Allow fade-out transition
-    }, 2800);
+      }, 200); // Quick fade-out transition
+    }, 850);
 
     return () => {
       clearInterval(progressInterval);
@@ -60,7 +60,7 @@ export default function SplashScreen({ onComplete }) {
       <div className="flex flex-col items-center justify-center space-y-6 max-w-md px-4">
         <ClearCartAnimatedLogo
           size="hero"
-          duration={2.0}
+          duration={0.75}
           showText={true}
           interactive={false}
         />
