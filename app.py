@@ -147,7 +147,10 @@ if DIST.is_dir():
 
     @app.get("/", response_class=FileResponse)
     async def serve_root():
-        return FileResponse(str(DIST / "index.html"))
+        return FileResponse(
+            str(DIST / "index.html"),
+            headers={"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0"},
+        )
 
     @app.get("/{full_path:path}", response_class=FileResponse)
     async def serve_spa(full_path: str):
@@ -155,7 +158,10 @@ if DIST.is_dir():
         target = DIST / full_path
         if target.is_file():
             return FileResponse(str(target))
-        return FileResponse(str(DIST / "index.html"))
+        return FileResponse(
+            str(DIST / "index.html"),
+            headers={"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0"},
+        )
 else:
     @app.get("/")
     async def no_frontend():

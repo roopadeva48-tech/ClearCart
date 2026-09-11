@@ -14,15 +14,7 @@ import {
 
 export default function AuthPage({ onLoginSuccess }) {
   // mode: 'signin' | 'signup'
-  const [mode, setMode] = useState(() => {
-    try {
-      const stored = localStorage.getItem("clearcart_registered_users");
-      const users = stored ? JSON.parse(stored) : [];
-      return users.length > 0 ? "signin" : "signup";
-    } catch {
-      return "signup";
-    }
-  });
+  const [mode, setMode] = useState("signin");
 
   // Track transition direction: 'forward' (signin -> signup) or 'backward' (signup -> signin)
   const [transitionDirection, setTransitionDirection] = useState("forward");
@@ -35,8 +27,8 @@ export default function AuthPage({ onLoginSuccess }) {
     setSuccessMsg("");
   };
 
-  // Sign In state
-  const [signInUserId, setSignInUserId] = useState("");
+  // Sign In state (empty by default for manual entry)
+  const [signInMailId, setSignInMailId] = useState("");
   const [signInPassword, setSignInPassword] = useState("");
   const [showSignInPassword, setShowSignInPassword] = useState(false);
 
@@ -104,30 +96,35 @@ export default function AuthPage({ onLoginSuccess }) {
     setErrorMsg("");
     setSuccessMsg("");
 
-    const uid = signInUserId.trim();
+    const email = signInMailId.trim().toLowerCase();
     const pwd = signInPassword.trim();
 
-    if (!uid || !pwd) {
-      setErrorMsg("All fields are mandatory. Please enter both User ID/Email and Password.");
+    if (!email || !pwd) {
+      setErrorMsg("All fields are mandatory. Please enter both your Mail ID and Password.");
+      return;
+    }
+
+    if (!isValidEmail(email)) {
+      setErrorMsg("Please enter a valid Mail ID (e.g. manager@store.com).");
       return;
     }
 
     const users = getRegisteredUsers();
     const matched = users.find(
       (u) =>
-        (u.userId?.toLowerCase() === uid.toLowerCase() ||
-          u.username?.toLowerCase() === uid.toLowerCase() ||
-          u.mailId?.toLowerCase() === uid.toLowerCase()) &&
+        (u.mailId?.toLowerCase() === email ||
+          u.userId?.toLowerCase() === email ||
+          u.username?.toLowerCase() === email) &&
         u.password === pwd
     );
 
     if (matched) {
       const sessionUser = {
-        userId: matched.userId || matched.mailId || uid,
+        userId: matched.userId || matched.mailId || email,
         name: matched.name || "Store Manager",
         shopName: matched.shopName || "ClearCart Retail Store",
         description: matched.description || "Retail & Inventory Store",
-        mailId: matched.mailId || uid,
+        mailId: matched.mailId || email,
       };
       localStorage.setItem("clearcart_auth_user", JSON.stringify(sessionUser));
       setSuccessMsg("Sign in successful! Launching Copilot…");
@@ -136,7 +133,7 @@ export default function AuthPage({ onLoginSuccess }) {
       }, 300);
     } else {
       setErrorMsg(
-        "Invalid credentials. Please check your User ID / Password, or create a new account in 'Create Shop Account'."
+        "Invalid Mail ID or Password. If you do not have an account yet, please register under 'Create Shop Account'."
       );
     }
   }
@@ -310,21 +307,25 @@ export default function AuthPage({ onLoginSuccess }) {
           >
             {/* SIGN IN FORM */}
             {mode === "signin" && (
-              <form onSubmit={handleSignIn} className="space-y-4">
+              <form onSubmit={handleSignIn} className="space-y-4" autoComplete="off">
                 <div className="fade-up stagger-1">
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5 font-heading">
-                    User ID / Email
+                    Mail ID (Email)
                   </label>
                   <div className="relative flex items-center group">
                     <span className="absolute left-3.5 text-slate-400 group-focus-within:text-blue-600 transition-colors">
-                      <IconUser className="w-4 h-4" />
+                      <IconMail className="w-4 h-4" />
                     </span>
                     <input
-                      type="text"
+                      type="email"
+                      name="cc_user_email"
+                      autoComplete="off"
+                      data-lpignore="true"
+                      data-1p-ignore
                       required
-                      value={signInUserId}
-                      onChange={(e) => setSignInUserId(e.target.value)}
-                      placeholder="e.g. manager or manager@clearcart.store"
+                      value={signInMailId}
+                      onChange={(e) => setSignInMailId(e.target.value)}
+                      placeholder="Enter your registered mail ID"
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-3.5 py-2.5 text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all shadow-xs"
                     />
                   </div>
@@ -340,6 +341,10 @@ export default function AuthPage({ onLoginSuccess }) {
                     </span>
                     <input
                       type={showSignInPassword ? "text" : "password"}
+                      name="cc_user_password"
+                      autoComplete="new-password"
+                      data-lpignore="true"
+                      data-1p-ignore
                       required
                       value={signInPassword}
                       onChange={(e) => setSignInPassword(e.target.value)}
