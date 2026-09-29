@@ -224,74 +224,98 @@ export default function AuthPage({ onLoginSuccess }) {
     }, 400);
   }
 
+  function handleDemoLogin() {
+    const demoUser = {
+      userId: "manager@downtownstore.com",
+      name: "Store Manager",
+      shopName: "Downtown Store #104",
+      description: "Retail grocery & essentials supermarket",
+      mailId: "manager@downtownstore.com",
+    };
+    localStorage.setItem("clearcart_auth_user", JSON.stringify(demoUser));
+    onLoginSuccess(demoUser);
+  }
+
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col justify-center items-center py-10 px-4 sm:px-6 relative overflow-hidden">
-      {/* Soft Background Accents */}
-      <div className="absolute -top-32 -left-32 w-96 h-96 bg-blue-100/60 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-indigo-100/50 rounded-full blur-3xl pointer-events-none" />
+    <div className="min-h-screen bg-canvas flex flex-col justify-center items-center py-10 px-4 sm:px-6 relative overflow-hidden transition-colors duration-300">
+      {/* Ambient Glows */}
+      <div className="absolute -top-32 -left-32 w-96 h-96 bg-blue-500/10 dark:bg-blue-500/20 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-indigo-500/10 dark:bg-indigo-500/20 rounded-full blur-3xl pointer-events-none" />
 
       {/* Main Card */}
-      <div className="relative w-full max-w-lg bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden transition-all">
+      <div className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-2xl overflow-hidden transition-all">
         {/* Top Header Banner */}
-        <div className="bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-700 text-white p-6 sm:p-8 text-center relative overflow-hidden">
+        <div className="bg-gradient-to-r from-blue-700 via-indigo-600 to-violet-700 text-white p-6 sm:p-8 text-center relative overflow-hidden">
           <div className="relative z-10 flex flex-col items-center">
-            <div className="w-16 h-16 rounded-2xl bg-white/15 backdrop-blur-md border border-white/25 text-white flex items-center justify-center mb-3 shadow-md">
+            <div className="w-16 h-16 rounded-2xl bg-white/15 backdrop-blur-md border border-white/25 text-white flex items-center justify-center mb-3 shadow-lg">
               <IconSpark className="w-10 h-10" />
             </div>
             <h1 className="font-heading font-extrabold text-2xl tracking-tight">
               ClearCart <span className="text-blue-200">Intelligence</span>
             </h1>
             <p className="text-xs sm:text-sm text-blue-100/90 font-medium mt-1 max-w-sm">
-              AI-Powered Retail Copilot &amp; Inventory Decision Engine
+              Grounded AI Decision Copilot for Retail Inventory &amp; Sales
             </p>
           </div>
         </div>
 
+        {/* Demo Quick Access Bar */}
+        <div className="px-6 sm:px-8 pt-5">
+          <button
+            type="button"
+            onClick={handleDemoLogin}
+            className="w-full py-2.5 px-4 rounded-2xl bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/60 dark:to-indigo-950/60 hover:from-blue-100 hover:to-indigo-100 dark:hover:from-blue-900/60 dark:hover:to-indigo-900/60 border border-blue-200 dark:border-blue-800/80 text-blue-800 dark:text-blue-300 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs group"
+          >
+            <IconSpark className="w-4 h-4 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform" />
+            <span>⚡ Instant Demo Access (Downtown Store #104)</span>
+          </button>
+        </div>
+
         {/* Tab Selector with Smooth Sliding Indicator */}
-        <div className="relative flex border-b border-slate-200 bg-slate-100/90 p-1.5">
+        <div className="relative flex border-b border-slate-200 dark:border-slate-800 bg-slate-100/90 dark:bg-slate-800/80 p-1.5 mx-6 sm:mx-8 mt-4 rounded-2xl">
           {/* Animated background pill */}
           <div
-            className={`absolute top-1.5 bottom-1.5 w-[calc(50%-0.375rem)] bg-white rounded-2xl shadow-xs border border-slate-200/80 transition-all duration-300 ease-out pointer-events-none ${
+            className={`absolute top-1.5 bottom-1.5 w-[calc(50%-0.375rem)] bg-white dark:bg-slate-900 rounded-xl shadow-xs border border-slate-200/80 dark:border-slate-700 transition-all duration-300 ease-out pointer-events-none ${
               mode === "signin" ? "left-1.5" : "left-[calc(50%+0.1875rem)]"
             }`}
           />
           <button
             type="button"
             onClick={() => switchMode("signin")}
-            className={`relative z-10 flex-1 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-colors duration-200 cursor-pointer text-center ${
+            className={`relative z-10 flex-1 py-2 rounded-xl text-xs sm:text-sm font-bold transition-colors duration-200 cursor-pointer text-center ${
               mode === "signin"
-                ? "text-blue-700 font-extrabold"
-                : "text-slate-500 hover:text-slate-800"
+                ? "text-blue-700 dark:text-blue-400 font-extrabold"
+                : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
             }`}
           >
-            Sign In (Log In)
+            Sign In
           </button>
           <button
             type="button"
             onClick={() => switchMode("signup")}
-            className={`relative z-10 flex-1 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-colors duration-200 cursor-pointer text-center ${
+            className={`relative z-10 flex-1 py-2 rounded-xl text-xs sm:text-sm font-bold transition-colors duration-200 cursor-pointer text-center ${
               mode === "signup"
-                ? "text-blue-700 font-extrabold"
-                : "text-slate-500 hover:text-slate-800"
+                ? "text-blue-700 dark:text-blue-400 font-extrabold"
+                : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
             }`}
           >
-            Create Shop Account (Sign Up)
+            Create Shop Account
           </button>
         </div>
 
-        {/* Form Body with Smooth Slide Animation */}
+        {/* Form Body */}
         <div className="p-6 sm:p-8">
           {/* Alerts */}
           {errorMsg && (
-            <div className="mb-5 p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-medium flex items-start gap-2.5 animate-slide-right">
-              <IconAlert className="w-4 h-4 text-rose-600 flex-shrink-0 mt-0.5" />
+            <div className="mb-5 p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-300 text-xs font-medium flex items-start gap-2.5 animate-slide-right">
+              <IconAlert className="w-4 h-4 text-rose-600 dark:text-rose-400 flex-shrink-0 mt-0.5" />
               <div>{errorMsg}</div>
             </div>
           )}
 
           {successMsg && (
-            <div className="mb-5 p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-medium flex items-start gap-2.5 animate-slide-right">
-              <IconCheck className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
+            <div className="mb-5 p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-medium flex items-start gap-2.5 animate-slide-right">
+              <IconCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" />
               <div>{successMsg}</div>
             </div>
           )}
@@ -309,11 +333,11 @@ export default function AuthPage({ onLoginSuccess }) {
             {mode === "signin" && (
               <form onSubmit={handleSignIn} className="space-y-4" autoComplete="off">
                 <div className="fade-up stagger-1">
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5 font-heading">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5 font-heading">
                     Mail ID (Email)
                   </label>
                   <div className="relative flex items-center group">
-                    <span className="absolute left-3.5 text-slate-400 group-focus-within:text-blue-600 transition-colors">
+                    <span className="absolute left-3.5 text-slate-400 dark:text-slate-500 group-focus-within:text-blue-600 dark:group-focus-within:text-blue-400 transition-colors">
                       <IconMail className="w-4 h-4" />
                     </span>
                     <input
@@ -326,17 +350,17 @@ export default function AuthPage({ onLoginSuccess }) {
                       value={signInMailId}
                       onChange={(e) => setSignInMailId(e.target.value)}
                       placeholder="Enter your registered mail ID"
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-3.5 py-2.5 text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all shadow-xs"
+                      className="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl pl-10 pr-3.5 py-2.5 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/40 transition-all shadow-xs"
                     />
                   </div>
                 </div>
 
                 <div className="fade-up stagger-2">
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5 font-heading">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5 font-heading">
                     Password
                   </label>
                   <div className="relative flex items-center group">
-                    <span className="absolute left-3.5 text-slate-400 group-focus-within:text-blue-600 transition-colors">
+                    <span className="absolute left-3.5 text-slate-400 dark:text-slate-500 group-focus-within:text-blue-600 dark:group-focus-within:text-blue-400 transition-colors">
                       <IconLock className="w-4 h-4" />
                     </span>
                     <input
@@ -349,12 +373,12 @@ export default function AuthPage({ onLoginSuccess }) {
                       value={signInPassword}
                       onChange={(e) => setSignInPassword(e.target.value)}
                       placeholder="Enter your password"
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-10 py-2.5 text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all shadow-xs"
+                      className="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl pl-10 pr-10 py-2.5 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/40 transition-all shadow-xs"
                     />
                     <button
                       type="button"
                       onClick={() => setShowSignInPassword(!showSignInPassword)}
-                      className="absolute right-3 text-slate-400 hover:text-slate-600 p-1 cursor-pointer transition-transform active:scale-95"
+                      className="absolute right-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 p-1 cursor-pointer transition-transform active:scale-95"
                     >
                       {showSignInPassword ? <IconEyeOff className="w-4 h-4" /> : <IconEye className="w-4 h-4" />}
                     </button>
@@ -372,15 +396,15 @@ export default function AuthPage({ onLoginSuccess }) {
               </form>
             )}
 
-            {/* SIGN UP FORM (Name, Shop Name, Description, Mail ID, Password) */}
+            {/* SIGN UP FORM */}
             {mode === "signup" && (
               <form onSubmit={handleSignUp} className="space-y-3.5">
                 <div className="fade-up stagger-1">
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 font-heading">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 font-heading">
                     Full Name
                   </label>
                   <div className="relative flex items-center group">
-                    <span className="absolute left-3.5 text-slate-400 group-focus-within:text-blue-600 transition-colors">
+                    <span className="absolute left-3.5 text-slate-400 dark:text-slate-500 group-focus-within:text-blue-600 dark:group-focus-within:text-blue-400 transition-colors">
                       <IconUser className="w-4 h-4" />
                     </span>
                     <input
@@ -389,17 +413,17 @@ export default function AuthPage({ onLoginSuccess }) {
                       value={signUpName}
                       onChange={(e) => setSignUpName(e.target.value)}
                       placeholder="e.g. Sarah Jenkins"
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-3.5 py-2 text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all shadow-xs"
+                      className="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl pl-10 pr-3.5 py-2 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/40 transition-all shadow-xs"
                     />
                   </div>
                 </div>
 
                 <div className="fade-up stagger-2">
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 font-heading">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 font-heading">
                     Shop Name
                   </label>
                   <div className="relative flex items-center group">
-                    <span className="absolute left-3.5 text-slate-400 group-focus-within:text-blue-600 transition-colors">
+                    <span className="absolute left-3.5 text-slate-400 dark:text-slate-500 group-focus-within:text-blue-600 dark:group-focus-within:text-blue-400 transition-colors">
                       <IconStore className="w-4 h-4" />
                     </span>
                     <input
@@ -408,13 +432,13 @@ export default function AuthPage({ onLoginSuccess }) {
                       value={signUpShopName}
                       onChange={(e) => setSignUpShopName(e.target.value)}
                       placeholder="e.g. Apex Supermarket #102"
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-3.5 py-2 text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all shadow-xs"
+                      className="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl pl-10 pr-3.5 py-2 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/40 transition-all shadow-xs"
                     />
                   </div>
                 </div>
 
                 <div className="fade-up stagger-3">
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 font-heading">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 font-heading">
                     Shop Description
                   </label>
                   <textarea
@@ -423,16 +447,16 @@ export default function AuthPage({ onLoginSuccess }) {
                     value={signUpDescription}
                     onChange={(e) => setSignUpDescription(e.target.value)}
                     placeholder="e.g. Retail grocery chain carrying produce, dairy, bakery, and dry goods"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all shadow-xs resize-none"
+                    className="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/40 transition-all shadow-xs resize-none"
                   />
                 </div>
 
                 <div className="fade-up stagger-4">
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 font-heading">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 font-heading">
                     Mail ID (Email)
                   </label>
                   <div className="relative flex items-center group">
-                    <span className="absolute left-3.5 text-slate-400 group-focus-within:text-blue-600 transition-colors">
+                    <span className="absolute left-3.5 text-slate-400 dark:text-slate-500 group-focus-within:text-blue-600 dark:group-focus-within:text-blue-400 transition-colors">
                       <IconMail className="w-4 h-4" />
                     </span>
                     <input
@@ -441,17 +465,17 @@ export default function AuthPage({ onLoginSuccess }) {
                       value={signUpMailId}
                       onChange={(e) => setSignUpMailId(e.target.value)}
                       placeholder="e.g. manager@store.com"
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-3.5 py-2 text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all shadow-xs"
+                      className="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl pl-10 pr-3.5 py-2 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/40 transition-all shadow-xs"
                     />
                   </div>
                 </div>
 
                 <div className="fade-up stagger-5">
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 font-heading">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 font-heading">
                     Password
                   </label>
                   <div className="relative flex items-center group">
-                    <span className="absolute left-3.5 text-slate-400 group-focus-within:text-blue-600 transition-colors">
+                    <span className="absolute left-3.5 text-slate-400 dark:text-slate-500 group-focus-within:text-blue-600 dark:group-focus-within:text-blue-400 transition-colors">
                       <IconLock className="w-4 h-4" />
                     </span>
                     <input
@@ -460,31 +484,31 @@ export default function AuthPage({ onLoginSuccess }) {
                       value={signUpPassword}
                       onChange={(e) => setSignUpPassword(e.target.value)}
                       placeholder="Create a password (e.g. Retail@2026)"
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-10 py-2 text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all shadow-xs"
+                      className="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl pl-10 pr-10 py-2 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/40 transition-all shadow-xs"
                     />
                     <button
                       type="button"
                       onClick={() => setShowSignUpPassword(!showSignUpPassword)}
-                      className="absolute right-3 text-slate-400 hover:text-slate-600 p-1 cursor-pointer transition-transform active:scale-95"
+                      className="absolute right-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 p-1 cursor-pointer transition-transform active:scale-95"
                     >
                       {showSignUpPassword ? <IconEyeOff className="w-4 h-4" /> : <IconEye className="w-4 h-4" />}
                     </button>
                   </div>
 
                   {/* Password Criteria Checklist */}
-                  <div className="mt-2 p-2.5 bg-slate-50 rounded-xl border border-slate-200/80 text-[11px] space-y-1">
-                    <p className="font-semibold text-slate-600 mb-1">Password Requirements:</p>
+                  <div className="mt-2 p-2.5 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200/80 dark:border-slate-700/80 text-[11px] space-y-1">
+                    <p className="font-semibold text-slate-600 dark:text-slate-300 mb-1">Password Requirements:</p>
                     <div className="grid grid-cols-2 gap-1 font-mono text-[10px]">
-                      <span className={`flex items-center gap-1 ${/[A-Z]/.test(signUpPassword) ? "text-emerald-600 font-bold" : "text-slate-400"}`}>
+                      <span className={`flex items-center gap-1 ${/[A-Z]/.test(signUpPassword) ? "text-emerald-600 dark:text-emerald-400 font-bold" : "text-slate-400 dark:text-slate-500"}`}>
                         {/[A-Z]/.test(signUpPassword) ? "✓" : "○"} 1 Capital Letter (A-Z)
                       </span>
-                      <span className={`flex items-center gap-1 ${/[0-9]/.test(signUpPassword) ? "text-emerald-600 font-bold" : "text-slate-400"}`}>
+                      <span className={`flex items-center gap-1 ${/[0-9]/.test(signUpPassword) ? "text-emerald-600 dark:text-emerald-400 font-bold" : "text-slate-400 dark:text-slate-500"}`}>
                         {/[0-9]/.test(signUpPassword) ? "✓" : "○"} Numbers (0-9)
                       </span>
-                      <span className={`flex items-center gap-1 ${/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]/.test(signUpPassword) ? "text-emerald-600 font-bold" : "text-slate-400"}`}>
+                      <span className={`flex items-center gap-1 ${/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]/.test(signUpPassword) ? "text-emerald-600 dark:text-emerald-400 font-bold" : "text-slate-400 dark:text-slate-500"}`}>
                         {/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]/.test(signUpPassword) ? "✓" : "○"} 1 Special Char (!@#$)
                       </span>
-                      <span className={`flex items-center gap-1 ${signUpPassword.length >= 6 ? "text-emerald-600 font-bold" : "text-slate-400"}`}>
+                      <span className={`flex items-center gap-1 ${signUpPassword.length >= 6 ? "text-emerald-600 dark:text-emerald-400 font-bold" : "text-slate-400 dark:text-slate-500"}`}>
                         {signUpPassword.length >= 6 ? "✓" : "○"} Min 6 Characters
                       </span>
                     </div>

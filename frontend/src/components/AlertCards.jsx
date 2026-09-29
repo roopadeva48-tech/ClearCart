@@ -1,29 +1,29 @@
 import { useAlerts } from "../hooks/useAlerts";
-import { IconAlert, IconTrend, IconPackage, IconSpark, IconCart } from "./Icons";
+import { IconAlert, IconTrend, IconBox, IconSpark, IconCart } from "./Icons";
 
 const ICON_MAP = {
   stockout: <IconAlert className="w-5 h-5" />,
   spike:    <IconTrend  className="w-5 h-5" />,
-  dead:     <IconPackage className="w-5 h-5" />,
+  dead:     <IconBox    className="w-5 h-5" />,
 };
 
 const STYLE_MAP = {
   stockout: {
-    card: "alert-stockout",
-    iconBg: "bg-rose-100 text-rose-600",
-    badge: "bg-rose-100 text-rose-800 border-rose-200",
+    card: "border-rose-200 dark:border-rose-900/60 bg-gradient-to-b from-rose-50/50 to-white dark:from-rose-950/20 dark:to-slate-900/90",
+    iconBg: "bg-rose-100 dark:bg-rose-950 text-rose-600 dark:text-rose-400",
+    badge: "bg-rose-100 dark:bg-rose-950/80 text-rose-800 dark:text-rose-300 border-rose-200 dark:border-rose-800/60",
     label: "CRITICAL STOCKOUT",
   },
   spike: {
-    card: "alert-spike",
-    iconBg: "bg-amber-100 text-amber-700",
-    badge: "bg-amber-100 text-amber-800 border-amber-200",
+    card: "border-amber-200 dark:border-amber-900/60 bg-gradient-to-b from-amber-50/50 to-white dark:from-amber-950/20 dark:to-slate-900/90",
+    iconBg: "bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-400",
+    badge: "bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-800/60",
     label: "VELOCITY SPIKE",
   },
   dead: {
-    card: "alert-dead",
-    iconBg: "bg-slate-100 text-slate-600",
-    badge: "bg-slate-100 text-slate-700 border-slate-200",
+    card: "border-slate-200 dark:border-slate-800 bg-gradient-to-b from-slate-50/60 to-white dark:from-slate-800/20 dark:to-slate-900/90",
+    iconBg: "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300",
+    badge: "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700",
     label: "DEAD INVENTORY",
   },
 };
@@ -73,16 +73,16 @@ export default function AlertCards({
     <section className="fade-up-d1 space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <h2 className="text-xs font-bold text-slate-600 uppercase tracking-wider font-heading">
+          <h2 className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider font-heading">
             Proactive Attention Alerts
           </h2>
-          <span className="text-[11px] font-mono font-semibold bg-rose-50 text-rose-700 px-2 py-0.5 rounded-full border border-rose-200">
+          <span className="text-[11px] font-mono font-semibold bg-rose-50 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 px-2 py-0.5 rounded-full border border-rose-200 dark:border-rose-800">
             {items.length} Active
           </span>
         </div>
         <button
           onClick={() => onAskCopilot("Summarize all active inventory alerts and what I should do first.")}
-          className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 transition"
+          className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 flex items-center gap-1 transition cursor-pointer"
         >
           <IconSpark className="w-3.5 h-3.5" />
           Ask Copilot to analyze all →
@@ -96,7 +96,7 @@ export default function AlertCards({
             <div
               key={i}
               id={`alert-card-${alert.type}-${i}`}
-              className={`stitch-card ${s.card} p-4.5 rounded-2xl flex flex-col justify-between gap-3 relative overflow-hidden`}
+              className={`stitch-card ${s.card} p-4.5 rounded-2xl flex flex-col justify-between gap-3 relative overflow-hidden transition-all`}
             >
               <div>
                 <div className="flex items-center justify-between gap-2 mb-2">
@@ -109,22 +109,22 @@ export default function AlertCards({
                     </span>
                   </div>
                 </div>
-                <p className="font-heading font-bold text-slate-900 text-sm leading-snug">
+                <p className="font-heading font-bold text-slate-900 dark:text-white text-sm leading-snug">
                   {alert.title}
                 </p>
-                <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+                <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 leading-relaxed">
                   {alert.detail}
                 </p>
               </div>
 
               {/* Action Buttons */}
-              <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
+              <div className="flex items-center gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
                 <button
                   id={`alert-action-ask-${i}`}
                   onClick={() => onAskCopilot(alert.prompt)}
-                  className="flex-1 text-xs py-1.5 px-2.5 rounded-lg bg-white hover:bg-slate-50 border border-slate-200 text-indigo-700 font-semibold transition flex items-center justify-center gap-1.5 shadow-2xs"
+                  className="flex-1 text-xs py-1.5 px-2.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-blue-700 dark:text-blue-300 font-semibold transition flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer"
                 >
-                  <IconSpark className="w-3.5 h-3.5 text-indigo-600" />
+                  <IconSpark className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
                   Ask Copilot
                 </button>
                 {alert.type === "stockout" && (
@@ -138,7 +138,7 @@ export default function AlertCards({
                       reorder_threshold: 15,
                       status: "critical",
                     })}
-                    className="text-xs py-1.5 px-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold transition flex items-center gap-1 shadow-2xs"
+                    className="text-xs py-1.5 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold transition flex items-center gap-1 shadow-2xs cursor-pointer"
                   >
                     <IconCart className="w-3.5 h-3.5" />
                     Reorder PO
@@ -152,3 +152,4 @@ export default function AlertCards({
     </section>
   );
 }
+

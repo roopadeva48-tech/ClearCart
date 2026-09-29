@@ -1,101 +1,125 @@
-@import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ─── Base Light Theme ──────────────────────────────── */
+/* ─── Base Theme Variables ──────────────────────────────── */
+:root {
+  --bg-primary: #f8fafc;
+  --bg-card: rgba(255, 255, 255, 0.92);
+  --border-card: rgba(226, 232, 240, 0.9);
+  --text-primary: #0f172a;
+  --text-muted: #64748b;
+  --brand-gradient: linear-gradient(135deg, #3b82f6 0%, #6366f1 50%, #8b5cf6 100%);
+}
+
+.dark {
+  --bg-primary: #090d16;
+  --bg-card: rgba(15, 23, 42, 0.75);
+  --border-card: rgba(51, 65, 85, 0.6);
+  --text-primary: #f8fafc;
+  --text-muted: #94a3b8;
+  --brand-gradient: linear-gradient(135deg, #60a5fa 0%, #818cf8 50%, #a78bfa 100%);
+}
+
 * {
   box-sizing: border-box;
 }
 
 body {
-  font-family: 'Inter', sans-serif;
-  background-color: #f8fafc;
-  color: #1e293b;
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
   min-height: 100vh;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 h1, h2, h3, h4, .font-heading {
-  font-family: 'Hanken Grotesk', sans-serif;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: -0.025em;
 }
 
 code, .font-mono {
   font-family: 'JetBrains Mono', monospace;
 }
 
-/* ─── Custom Light Scrollbar ────────────────────────── */
+/* ─── Custom Sleek Scrollbar ────────────────────────── */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: rgba(148, 163, 184, 0.35);
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: rgba(148, 163, 184, 0.6);
 }
 
-/* ─── Stitch Light Canvas Background ────────────────── */
+/* ─── Ambient Glow Canvas Background ────────────────── */
 .bg-canvas {
   background:
-    radial-gradient(ellipse 80% 50% at 10% 0%, rgba(37, 99, 235, 0.06) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 40% at 90% 100%, rgba(16, 185, 129, 0.04) 0%, transparent 60%),
-    #f8fafc;
+    radial-gradient(ellipse 80% 50% at 10% 0%, rgba(59, 130, 246, 0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 90% 100%, rgba(139, 92, 246, 0.07) 0%, transparent 60%),
+    radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.04) 0%, transparent 50%),
+    var(--bg-primary);
 }
 
-/* ─── Stitch Card Surfaces (Minimalist & Glass) ─────── */
-.stitch-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 1rem;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+.dark .bg-canvas {
+  background:
+    radial-gradient(ellipse 80% 50% at 10% 0%, rgba(59, 130, 246, 0.15) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 90% 100%, rgba(139, 92, 246, 0.12) 0%, transparent 60%),
+    radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.06) 0%, transparent 50%),
+    #090d16;
 }
 
-.stitch-card:hover {
-  border-color: #cbd5e1;
-  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.06), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+/* ─── Premium Glassmorphism Surfaces ────────────────── */
+.stitch-card, .premium-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-card);
+  border-radius: 1.25rem;
+  box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.06);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.stitch-card:hover, .premium-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(99, 102, 241, 0.35);
+  box-shadow: 0 12px 30px -6px rgba(59, 130, 246, 0.12);
 }
 
 .stitch-glass {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(226, 232, 240, 0.85);
-  border-radius: 1rem;
-  box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.05);
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: 1.25rem;
 }
 
-/* ─── KPI Light Gradients ───────────────────────────── */
-.kpi-indigo {
-  background: linear-gradient(145deg, #f5f7ff 0%, #ffffff 100%);
-  border-color: #e0e7ff;
-}
-.kpi-indigo:hover {
-  border-color: #c7d2fe;
+.dark .stitch-glass {
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(51, 65, 85, 0.6);
 }
 
-.kpi-rose {
-  background: linear-gradient(145deg, #fff5f5 0%, #ffffff 100%);
-  border-color: #fee2e2;
+/* ─── Glowing Accents ───────────────────────────────── */
+.glow-brand {
+  box-shadow: 0 0 35px -5px rgba(59, 130, 246, 0.35);
 }
-.kpi-rose:hover {
-  border-color: #fecaca;
+.glow-emerald {
+  box-shadow: 0 0 30px -5px rgba(16, 185, 129, 0.35);
 }
-
-.kpi-emerald {
-  background: linear-gradient(145deg, #f0fdf4 0%, #ffffff 100%);
-  border-color: #dcfce7;
-}
-.kpi-emerald:hover {
-  border-color: #bbf7d0;
+.glow-rose {
+  box-shadow: 0 0 30px -5px rgba(244, 63, 94, 0.35);
 }
 
 .kpi-amber {
